@@ -1,0 +1,41 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "capstone2-41149",
+          "appId": "1:977188120159:android:40268637b32ef5e7bb1dea",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "capstone2-41149",
+          "configurations": {
+            "android": "1:977188120159:android:40268637b32ef5e7bb1dea",
+            "ios": "1:977188120159:ios:b525f14f79db1e6fbb1dea",
+            "macos": "1:977188120159:ios:b525f14f79db1e6fbb1dea",
+            "web": "1:977188120159:web:35d59ea54ddb62f4bb1dea",
+            "windows": "1:977188120159:web:2a8fa63d86a2fd1abb1dea"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}
