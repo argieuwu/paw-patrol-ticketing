@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "977188120159",
-    "project_id": "capstone2-41149",
-    "storage_bucket": "capstone2-41149.appspot.com"
+    "project_number": "139211941947",
+    "project_id": "busbus-c4071",
+    "storage_bucket": "busbus-c4071.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:977188120159:android:40268637b32ef5e7bb1dea",
+        "mobilesdk_app_id": "1:139211941947:android:f3408539e3597b7d66941e",
         "android_client_info": {
           "package_name": "com.example.capstone2"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCc0aWgVHhZbQS2-7wiwkmj8Wa-yBi_5RM"
+          "current_key": "AIzaSyBD0MEkALLIClLiUCJxY2YSB-V4p5DjO9I"
         }
       ],
       "services": {
