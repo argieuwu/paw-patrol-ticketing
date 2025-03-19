@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCc0aWgVHhZbQS2-7wiwkmj8Wa-yBi_5RM',
-    appId: '1:977188120159:android:40268637b32ef5e7bb1dea',
-    messagingSenderId: '977188120159',
-    projectId: 'capstone2-41149',
-    storageBucket: 'capstone2-41149.appspot.com',
+    apiKey: 'AIzaSyBD0MEkALLIClLiUCJxY2YSB-V4p5DjO9I',
+    appId: '1:139211941947:android:f3408539e3597b7d66941e',
+    messagingSenderId: '139211941947',
+    projectId: 'busbus-c4071',
+    storageBucket: 'busbus-c4071.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAiId9-lnRhthKbL4rINwOe68eOM8OpGNY',
-    appId: '1:977188120159:ios:b525f14f79db1e6fbb1dea',
-    messagingSenderId: '977188120159',
-    projectId: 'capstone2-41149',
-    storageBucket: 'capstone2-41149.appspot.com',
+    apiKey: 'AIzaSyBH5zv9LWPeMXODH9opH3HK0WvqNAPOPWY',
+    appId: '1:139211941947:ios:670be4687ba2e4dc66941e',
+    messagingSenderId: '139211941947',
+    projectId: 'busbus-c4071',
+    storageBucket: 'busbus-c4071.firebasestorage.app',
     iosBundleId: 'com.example.capstone2',
   );
 
