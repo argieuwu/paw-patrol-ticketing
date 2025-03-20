@@ -1,3 +1,4 @@
+import 'package:capstone2/Admin/pages/AdminHomeScreen.dart';
 import 'package:capstone2/components/my_button.dart';
 import 'package:capstone2/components/my_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -63,6 +64,13 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       },
+    );
+  }
+  void goToAdminDemo(){
+    Navigator.push(context,
+        MaterialPageRoute(builder:
+            (context) => AdminHomeScreen()
+        )
     );
   }
 
@@ -149,6 +157,15 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: signUserIn,
                     ),
                   ),
+                  SizedBox(height: screenSize.height * 0.05),
+
+                  // Admin Demo button
+                  Padding(padding: EdgeInsets.symmetric(horizontal: padding),
+                  child: MyButton(
+                      onTap: goToAdminDemo,
+                      text: 'Admin Demo'),
+                  ),
+
                   SizedBox(height: screenSize.height * 0.05),
                   // Not a member? Register now
                   Row(
