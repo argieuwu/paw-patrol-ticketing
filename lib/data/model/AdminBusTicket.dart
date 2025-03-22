@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class AdminBusTicket{
   final List<String> destination;
   final DateTime departureTime;
@@ -9,7 +11,10 @@ class AdminBusTicket{
  Map<String,dynamic> toJson(){
    return {
      "data": {
-
+       "destination": destination,
+       "departure time": departureTime,
+       "total seats": totalSeats,
+       "ticket price": ticketPrice
      }
    };
  }
