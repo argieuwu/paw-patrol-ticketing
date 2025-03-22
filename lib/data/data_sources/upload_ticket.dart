@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UploadTicket {
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  Future<void> upLoadTicket(AdminBusTicket ticket) async{
-    // DocumentReference reference = await db.collection('admin').doc().set(ticket);
+  Future<void> uploadTicketToDatabase(Map<String,dynamic> ticket) async{
+    DocumentReference reference = db.collection('admin').doc();
+    db.collection('admin').doc(reference.id).set(ticket);
   }
 }
