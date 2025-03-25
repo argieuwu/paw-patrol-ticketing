@@ -1,3 +1,4 @@
+import 'package:capstone2/data/controllers/upload_data_controller.dart';
 import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:flutter/material.dart';
 import 'package:board_datetime_picker/board_datetime_picker.dart';
@@ -11,14 +12,13 @@ class AddBusRouteScreen extends StatefulWidget {
 
 class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
   DateTime dateTime = DateTime.now();
+  final TextEditingController pointAController = TextEditingController();
+  final TextEditingController pointBController = TextEditingController();
+  final TextEditingController timeController = TextEditingController();
+  final TextEditingController seatsController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final TextEditingController pointAController = TextEditingController();
-    final TextEditingController pointBController = TextEditingController();
-    final TextEditingController timeController = TextEditingController();
-    final TextEditingController seatsController = TextEditingController();
-    final TextEditingController priceController = TextEditingController();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Bus Route'),
@@ -94,14 +94,12 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                AdminBusTicket(
-                    destination: [
-                      pointAController.toString(),
-                      pointBController.toString()
-                    ],
+                // Sa Frontend ninyo pwede ramo muhimog function para ani para hinlo
+                UploadTicketController().uploadTicket(AdminBusTicket(
+                    destination: [pointAController.text, pointBController.text],
                     departureTime: dateTime,
-                    totalSeats: int.parse(seatsController.toString()),
-                    ticketPrice: int.parse(priceController.toString()));
+                    totalSeats: int.parse(seatsController.text), // Recommend ko na i change ninyo ang int.parse to int.tryparse para ma error handle ninyo if mu butang man ug text ang user sa price
+                    ticketPrice: int.parse(priceController.text)));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Bus Route Added (Demo)')),
                 );
