@@ -1,3 +1,4 @@
+import 'package:capstone2/pages/Testing.dart';
 import 'package:capstone2/pages/auth.dart';
 import 'package:capstone2/screens/home/all_ticket.dart';
 import 'package:capstone2/screens/home/home_screen.dart'; // Import the HomeScreen
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/auth', // Set the initial route to the Auth screen
       routes: {
         '/auth': (context) => const Auth(), // Auth screen
-        '/home': (context) => HomeScreen(), // HomeScreen
+        '/home': (context) => Testing(), // HomeScreen
         '/allTickets': (context) {
           // Fetch the ticket data dynamically (e.g., from Firestore or a provider)
           final ticket = {

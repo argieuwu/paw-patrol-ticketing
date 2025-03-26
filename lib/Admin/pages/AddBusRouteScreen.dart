@@ -1,4 +1,4 @@
-import 'package:capstone2/data/controllers/upload_data_controller.dart';
+import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
 import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:flutter/material.dart';
 import 'package:board_datetime_picker/board_datetime_picker.dart';
@@ -95,7 +95,7 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
             ElevatedButton(
               onPressed: () {
                 // Sa Frontend ninyo pwede ramo muhimog function para ani para hinlo
-                UploadTicketController().uploadTicket(AdminBusTicket(
+                AdminTicketController().uploadTicket(AdminBusTicket(
                     destination: [pointAController.text, pointBController.text],
                     departureTime: dateTime,
                     totalSeats: int.parse(seatsController.text), // Recommend ko na i change ninyo ang int.parse to int.tryparse para ma error handle ninyo if mu butang man ug text ang user sa price

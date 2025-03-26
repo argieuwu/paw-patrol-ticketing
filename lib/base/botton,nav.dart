@@ -1,3 +1,4 @@
+import 'package:capstone2/pages/Testing.dart';
 import 'package:capstone2/screens/home/home_screen.dart';
 import 'package:capstone2/screens/person/profile_screen.dart';
 import 'package:capstone2/screens/search/search_screen.dart';
@@ -14,7 +15,7 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   final appScreens = [
-    HomeScreen(),
+    Testing(),
     const SearchScreen(),
     const TicketScreen(),
     const PersonScreen(),

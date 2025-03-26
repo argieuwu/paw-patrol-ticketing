@@ -1,15 +1,28 @@
 import 'package:capstone2/base/utils/app_json.dart';
 import 'package:capstone2/base/widgets/apps_double_text.dart';
 import 'package:capstone2/base/widgets/ticket_view.dart';
+import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
 import 'package:capstone2/res/app_style.dart';
 import 'package:capstone2/res/media.dart';
 import 'package:capstone2/screens/home/widgets/busRoutes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Stream<QuerySnapshot> ticketAdminStream;
+  @override
+  void initState() {
+    ticketAdminStream = AdminTicketController().getTickets();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,18 +109,20 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(
                     height: 20,
                   ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: ticketList
-                          .take(5)
-                          .map((singleTicket) => TicketView(
-                                ticket: singleTicket,
-                                onTap: () {},
-                              ))
-                          .toList(),
-                    ),
-                  ),
+
+
+                  // SingleChildScrollView(
+                  //   scrollDirection: Axis.horizontal,
+                  //   child: Row(
+                  //     children: ticketList
+                  //         .take(5)
+                  //         .map((singleTicket) => TicketView(
+                  //               ticket: singleTicket,
+                  //               onTap: () {},
+                  //             ))
+                  //         .toList(),
+                  //   ),
+                  // ),
                   const SizedBox(
                     height: 40,
                   ),

@@ -1,9 +1,7 @@
-import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
-class UploadTicket {
+class AdminTicketDatabase {
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
   Future<void> uploadTicketToDatabase(Map<String,dynamic> ticket) async {
@@ -15,5 +13,9 @@ class UploadTicket {
     catch(e){
       debugPrint("Error uploading to database : $e");
     }
+  }
+
+  Stream<QuerySnapshot> getAllAdminTicket() {
+       return db.collection('admin').snapshots();
   }
 }
