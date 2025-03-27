@@ -11,12 +11,17 @@ class Testing extends StatefulWidget {
 }
 
 class _TestingState extends State<Testing> {
+
+
+  // Template ni tanan once i implement ninyo sa frontend
+
   late Stream<QuerySnapshot> tickets;
   @override
   void initState() {
     tickets = AdminTicketController().getTickets();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return  StreamBuilder(
@@ -26,21 +31,32 @@ class _TestingState extends State<Testing> {
           return CircularProgressIndicator();
         }
         else if(!snapshot.hasData || snapshot.data == null){
-          return Text("Error Data");
+          return Text("Empty Data");
         }
         List<AdminBusTicket>? tickets = snapshot.data?.docs.map((e) {
           return AdminBusTicket.fromJSON(e.data() as Map<String,dynamic>);
         },).toList();
-        return ListView(
+        return ListView.builder(
           scrollDirection: Axis.horizontal,
-          children: [
-            Card(
-              child: Center(
-                child: Row(children: [
-                  Text(tickets![0].destination[0])
-                ],),
-              ),
-            ),],
+          itemCount: tickets?.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Column(
+              spacing: 10,
+              children: [
+                Text(index.toString()),
+                Text(tickets![index].destination[0]),
+                Text(tickets[index].destination[1]),
+                Text(tickets[index].departureTime.toString()),
+                Text(tickets[index].totalSeats.toString()),
+                Text(tickets[index].ticketPrice.toString()),
+                Text(tickets[index].isAircon.toString()),
+                ElevatedButton(onPressed: () {
+                  AdminTicketController().deleteAdminTicket(tickets[index]);
+                }, child: Text('Delete')),
+                ElevatedButton(onPressed: () => null, child: Text('Edit'))
+              ],
+            );
+          },
         );
       },);
   }

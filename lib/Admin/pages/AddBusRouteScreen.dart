@@ -95,11 +95,11 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
             ElevatedButton(
               onPressed: () {
                 // Sa Frontend ninyo pwede ramo muhimog function para ani para hinlo
-                AdminTicketController().uploadTicket(AdminBusTicket(
+                AdminTicketController().uploadTicket(AdminBusTicket.noID(
                     destination: [pointAController.text, pointBController.text],
                     departureTime: dateTime,
                     totalSeats: int.parse(seatsController.text), // Recommend ko na i change ninyo ang int.parse to int.tryparse para ma error handle ninyo if mu butang man ug text ang user sa price
-                    ticketPrice: int.parse(priceController.text)));
+                    ticketPrice: int.parse(priceController.text),isAircon: true));
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Bus Route Added (Demo)')),
                 );

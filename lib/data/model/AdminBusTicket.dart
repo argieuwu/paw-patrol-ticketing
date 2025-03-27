@@ -6,19 +6,33 @@ class AdminBusTicket {
   final DateTime departureTime;
   final int totalSeats;
   final int ticketPrice;
+  final String? ticketId;
+  final bool isAircon;
 
   AdminBusTicket(
-      {required this.destination,
+      {required this.ticketId,
+      required this.destination,
       required this.departureTime,
       required this.totalSeats,
-      required this.ticketPrice});
+      required this.ticketPrice,
+      required this.isAircon});
+
+  AdminBusTicket.noID(
+      {this.ticketId,
+      required this.destination,
+      required this.departureTime,
+      required this.totalSeats,
+      required this.ticketPrice,
+      required this.isAircon});
+
   Map<String, dynamic> toJson() {
     return {
       "data": {
         "destination": destination,
         "departure time": departureTime,
         "total seats": totalSeats,
-        "ticket price": ticketPrice
+        "ticket price": ticketPrice,
+        "aircon": isAircon
       }
     };
   }
@@ -29,8 +43,10 @@ class AdminBusTicket {
           map['data']['destination'][0],
           map['data']['destination'][1]
         ],
-        departureTime: (map['data']['departure time'] as Timestamp).toDate()  ,
+        departureTime: (map['data']['departure time'] as Timestamp).toDate(),
         totalSeats: map['data']['total seats'],
-        ticketPrice: map['data']['ticket price']);
+        ticketPrice: map['data']['ticket price'],
+        ticketId: map['data']['ticket id'],
+        isAircon: map['data']['aircon']);
   }
 }

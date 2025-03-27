@@ -1,3 +1,4 @@
+import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -17,5 +18,9 @@ class AdminTicketDatabase {
 
   Stream<QuerySnapshot> getAllAdminTicket() {
        return db.collection('admin').snapshots();
+  }
+
+  Future<void> deleteAdminTickets(AdminBusTicket ticket) async{
+    await db.collection('admin').doc(ticket.ticketId).delete();
   }
 }

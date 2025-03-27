@@ -4,12 +4,13 @@ import 'package:capstone2/base/widgets/big.circle.dart';
 import 'package:capstone2/base/widgets/big_dot.dart';
 import 'package:capstone2/base/widgets/text_style_1.dart';
 import 'package:capstone2/base/widgets/text_style_2.dart';
+import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:capstone2/res/app_style.dart';
 import 'package:flutter/material.dart';
 
 class TicketView extends StatelessWidget {
-  final Map<String, dynamic> ticket;
-  final bool wholeScreen;
+  final AdminBusTicket ticket;
+  final bool wholeScreen; // Dle ko sure boss para asa ninyo ning mga fields sa ticketview ninyo
   final bool? isColor;
   const TicketView(
       {super.key,
@@ -43,7 +44,7 @@ class TicketView extends StatelessWidget {
                 Row(
                   children: [
                     TextStyle1(
-                      text: ticket["from"]["code"],
+                      text: ticket.destination[0],
                       isColor: isColor,
                     ),
                     Expanded(child: Container()),
@@ -77,7 +78,7 @@ class TicketView extends StatelessWidget {
                     ),
                     Expanded(child: Container()),
                     TextStyle1(
-                      text: ticket["to"]["code"],
+                      text: ticket.destination[1],
                       isColor: isColor,
                     ),
                   ],
@@ -91,20 +92,20 @@ class TicketView extends StatelessWidget {
                     SizedBox(
                       width: 100,
                       child: TextStyle2(
-                        text: ticket["from"]["name"],
+                        text: ticket.destination[0],
                         isColor: isColor,
                       ),
                     ),
                     Expanded(child: Container()),
                     TextStyle2(
-                      text: ticket["flying_time"],
+                      text: ticket.departureTime.toString(), // Kamo na format ani sa frontend
                       isColor: isColor,
                     ),
                     Expanded(child: Container()),
                     SizedBox(
                       width: 100,
                       child: TextStyle2(
-                        text: ticket["to"]["name"],
+                        text: ticket.destination[1],
                         isColor: isColor,
                         align: TextAlign.end,
                       ),

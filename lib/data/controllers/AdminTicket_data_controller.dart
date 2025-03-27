@@ -18,5 +18,8 @@ class AdminTicketController {
     return ticketDatabase.getAllAdminTicket();
   }
 
+  void deleteAdminTicket(AdminBusTicket ticket) {
+    ticketDatabase.deleteAdminTickets(ticket);
+  }
 
 }

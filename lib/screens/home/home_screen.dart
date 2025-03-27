@@ -109,20 +109,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-
-
-                  // SingleChildScrollView(
-                  //   scrollDirection: Axis.horizontal,
-                  //   child: Row(
-                  //     children: ticketList
-                  //         .take(5)
-                  //         .map((singleTicket) => TicketView(
-                  //               ticket: singleTicket,
-                  //               onTap: () {},
-                  //             ))
-                  //         .toList(),
-                  //   ),
-                  // ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: ticketList
+                          .take(5)
+                          .map((singleTicket) => TicketView(
+                                ticket: singleTicket,
+                                onTap: () {},
+                              ))
+                          .toList(),
+                    ),
+                  ),
                   const SizedBox(
                     height: 40,
                   ),
