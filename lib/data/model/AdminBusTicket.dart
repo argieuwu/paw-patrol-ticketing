@@ -37,6 +37,19 @@ class AdminBusTicket {
     };
   }
 
+  Map<String, dynamic> toJsonID() {
+    return {
+      "data": {
+        "ticket id" : ticketId,
+        "destination": destination,
+        "departure time": departureTime,
+        "total seats": totalSeats,
+        "ticket price": ticketPrice,
+        "aircon": isAircon
+      }
+    };
+  }
+
   factory AdminBusTicket.fromJSON(Map<String, dynamic> map) {
     return AdminBusTicket(
         destination: [

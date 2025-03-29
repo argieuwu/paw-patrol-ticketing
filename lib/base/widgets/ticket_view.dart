@@ -16,8 +16,7 @@ class TicketView extends StatelessWidget {
       {super.key,
       required this.ticket,
       this.wholeScreen = false,
-      this.isColor,
-      required Null Function() onTap});
+      this.isColor});
 
   @override
   Widget build(BuildContext context) {
@@ -159,15 +158,15 @@ class TicketView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     AppColumnTextLayout(
-                        topText: ticket["date"],
+                        topText: ticket.departureTime.month.toString(),
                         bottomText: "Date",
                         alignment: CrossAxisAlignment.start),
                     AppColumnTextLayout(
-                        topText: ticket["departure_time"],
+                        topText: ticket.departureTime.toString(),
                         bottomText: "Departure Time",
                         alignment: CrossAxisAlignment.center),
                     AppColumnTextLayout(
-                        topText: ticket["number"].toString(),
+                        topText: 1234.toString(),
                         bottomText: "Number",
                         alignment: CrossAxisAlignment.end),
                   ],

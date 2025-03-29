@@ -5,8 +5,13 @@ class UserTicketDatabase{
   FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
-  Future<void> uploadUserTicketToDatabase(Map<String,dynamic> map) async{
+  Future<void> uploadUserTicketToDatabase(Map<String,dynamic> ticket) async{
     DocumentReference reference = db.collection('user').doc(auth.currentUser!.uid).collection('tickets').doc(); // Never ever jud ni ma empty ning Uid
-    await reference.set(map);
+    ticket['user ticket id'] = reference.id;
+    await reference.set(ticket);
+  }
+  
+  Stream<QuerySnapshot> getUserTickets() {
+    return db.collection('user').doc(auth.currentUser!.uid).collection('tickets').snapshots();
   }
 }

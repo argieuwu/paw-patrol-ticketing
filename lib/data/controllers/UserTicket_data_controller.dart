@@ -1,16 +1,21 @@
 import 'package:capstone2/data/data_sources/UserTicketDatabase.dart';
+import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:capstone2/data/model/UsereBusTicket.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
 class UserTicketController{
 
-  void uploadUserTicket(UserBusTicket ticket){
+  Future<void> uploadUserTicket(UserBusTicket ticket) async {
     try{
-      UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
+     await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
     }
     catch(e){
-      debugPrint('Uploading User data failed');
+      debugPrint('Uploading User data failed: $e');
     }
 
+  }
+  Stream<QuerySnapshot> getUserTickets(){
+    return UserTicketDatabase().getUserTickets();
   }
 }

@@ -31,13 +31,12 @@ class TicketScreen extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          Container(
-              padding: EdgeInsets.only(left: 16),
-              child: TicketView(
-                ticket: ticketList[0],
-                isColor: true,
-                onTap: () {},
-              )),
+          // Container(
+          //     padding: EdgeInsets.only(left: 16),
+          //     child: TicketView(
+          //       ticket: ticketList[0],
+          //       isColor: true,
+          //     )),
         ],
       ),
     );
