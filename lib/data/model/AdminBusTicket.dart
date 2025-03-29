@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 
 class AdminBusTicket {
   final List<String> destination;
@@ -50,16 +49,36 @@ class AdminBusTicket {
     };
   }
 
+
   factory AdminBusTicket.fromJSON(Map<String, dynamic> map) {
+    // Helper function to safely parse the destination field
+    // This handles different possible data structures:
+    // 1. If destination is a List -> convert directly to List<String>
+    // 2. If destination is a Map with numeric keys -> convert to List
+    // 3. If destination has unexpected format -> return empty list to prevent crashes
+    List<String> parseDestination() {
+      var dest = map['destination'];
+      if (dest is List) {
+        return List<String>.from(dest);
+      } else if (dest is Map) {
+        return [dest['0'] ?? '', dest['1'] ?? ''];
+      }
+      return ['', '']; // Default empty list if structure is unexpected
+    }
+
     return AdminBusTicket(
-        destination: [
-          map['data']['destination'][0],
-          map['data']['destination'][1]
-        ],
-        departureTime: (map['data']['departure time'] as Timestamp).toDate(),
-        totalSeats: map['data']['total seats'],
-        ticketPrice: map['data']['ticket price'],
-        ticketId: map['data']['ticket id'],
-        isAircon: map['data']['aircon']);
+      // Use the safe parsing function for destination
+        destination: parseDestination(),
+        // Check if departure_time is actually a Timestamp before converting
+        // If not, use current time as fallback to prevent crashes
+        departureTime: (map['departure time'] is Timestamp)
+            ? (map['departure time'] as Timestamp).toDate()
+            : DateTime.now(),
+        // Add null checks with default values for all numeric fields
+        totalSeats: map['total seats'] ?? 0,
+        ticketPrice: map['ticket price'] ?? 0,
+        ticketId: map['ticket id'],
+        // Add null check for boolean with false as default
+        isAircon: map['aircon'] ?? false);
   }
 }
