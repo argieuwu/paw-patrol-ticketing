@@ -1,4 +1,5 @@
 import 'package:capstone2/Admin/pages/AddBusRouteScreen.dart';
+import 'package:capstone2/Admin/pages/ManageBusRoutesScreen.dart';
 import 'package:capstone2/Admin/pages/MarkTripCompletedScreen.dart';
 import 'package:capstone2/Admin/pages/ScanQRScreen.dart';
 import 'package:capstone2/Admin/pages/ViewBookingsScreen.dart';
@@ -28,6 +29,20 @@ class AdminHomeScreen extends StatelessWidget {
           },
             child: Text('Add Bus Route'),
           ),
+
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed:(){
+              Navigator.push(context,
+                  MaterialPageRoute(
+                      builder: (context) => ManageBusRoutesScreen()
+                  )
+              );
+            },
+            child: Text('Manage Current Bus Routes'),
+
+          ),
+
           SizedBox(height: 16),
           ElevatedButton(
               onPressed: (){
@@ -37,6 +52,7 @@ class AdminHomeScreen extends StatelessWidget {
                 )
             );
           },
+
             child: Text('View Bookings'),
           ),
           SizedBox(height: 16),
