@@ -18,8 +18,17 @@ class AdminTicketController {
     return ticketDatabase.getAllAdminTicket();
   }
 
-  void deleteAdminTicket(AdminBusTicket ticket) {
+  Future<void> deleteAdminTicket(AdminBusTicket ticket) async {
     ticketDatabase.deleteAdminTickets(ticket);
   }
+
+  Future<void> updatedAdminTicket(AdminBusTicket ticket) async{
+    try{
+      await ticketDatabase.updateAdminTicket(ticket);
+    } catch(e){
+      debugPrint("Error Controller update: $e");
+    }
+
+}
 
 }
