@@ -27,6 +27,7 @@ class AdminBusTicket {
   Map<String, dynamic> toJson() {
     return {
       "data": {
+        "ticket id": ticketId, //for update daw
         "destination": destination,
         "departure time": departureTime,
         "total seats": totalSeats,
@@ -49,36 +50,19 @@ class AdminBusTicket {
     };
   }
 
-
-  factory AdminBusTicket.fromJSON(Map<String, dynamic> map) {
-    // Helper function to safely parse the destination field
-    // This handles different possible data structures:
-    // 1. If destination is a List -> convert directly to List<String>
-    // 2. If destination is a Map with numeric keys -> convert to List
-    // 3. If destination has unexpected format -> return empty list to prevent crashes
-    List<String> parseDestination() {
-      var dest = map['destination'];
-      if (dest is List) {
-        return List<String>.from(dest);
-      } else if (dest is Map) {
-        return [dest['0'] ?? '', dest['1'] ?? ''];
-      }
-      return ['', '']; // Default empty list if structure is unexpected
-    }
+  factory AdminBusTicket.fromJSON(Map<String, dynamic> json) {
+    final data = json['data'] ?? json; // supports nested or direct map
 
     return AdminBusTicket(
-      // Use the safe parsing function for destination
-        destination: parseDestination(),
-        // Check if departure_time is actually a Timestamp before converting
-        // If not, use current time as fallback to prevent crashes
-        departureTime: (map['departure time'] is Timestamp)
-            ? (map['departure time'] as Timestamp).toDate()
-            : DateTime.now(),
-        // Add null checks with default values for all numeric fields
-        totalSeats: map['total seats'] ?? 0,
-        ticketPrice: map['ticket price'] ?? 0,
-        ticketId: map['ticket id'],
-        // Add null check for boolean with false as default
-        isAircon: map['aircon'] ?? false);
+      ticketId: data['ticket id'] ?? '',
+      destination: List<String>.from(data['destination'] ?? ['', '']),
+      departureTime: (data['departure time'] != null && data['departure time'] is Timestamp)
+          ? (data['departure time'] as Timestamp).toDate()
+          : DateTime.now(), // Fallback default
+      totalSeats: data['total seats'] ?? 0,
+      ticketPrice: data['ticket price'] ?? 0,
+      isAircon: data['aircon'] ?? false,
+    );
   }
+
 }

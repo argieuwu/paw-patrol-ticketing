@@ -23,4 +23,20 @@ class AdminTicketDatabase {
   Future<void> deleteAdminTickets(AdminBusTicket ticket) async{
     await db.collection('admin').doc(ticket.ticketId).delete();
   }
+
+  Future<void> updateAdminTicket(AdminBusTicket ticket) async {
+    try {
+      await db.collection('admin').doc(ticket.ticketId).update({
+        'data.destination': ticket.destination,
+        'data.departure time': Timestamp.fromDate(ticket.departureTime),
+        'data.total seats': ticket.totalSeats,
+        'data.ticket price': ticket.ticketPrice,
+        'data.aircon': ticket.isAircon,
+      });
+    } catch (e) {
+      debugPrint("Error updating ticket in database: $e");
+    }
+  }
+
+
 }
