@@ -12,6 +12,9 @@ class AddBusRouteScreen extends StatefulWidget {
 
 class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
   DateTime dateTime = DateTime.now();
+
+  bool isAircon = false; //checker aircon bus
+
   final TextEditingController pointAController = TextEditingController();
   final TextEditingController pointBController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
@@ -92,6 +95,17 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
               ),
               keyboardType: TextInputType.number,
             ),
+            SizedBox(height: 10),
+            CheckboxListTile(
+              title: Text("Air condition Bus"),
+                value: isAircon,
+                onChanged: (bool? value){
+                setState(() {
+                  isAircon = value ?? false;
+                });
+                }
+            ),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Sa Frontend ninyo pwede ramo muhimog function para ani para hinlo
@@ -99,7 +113,10 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
                     destination: [pointAController.text, pointBController.text],
                     departureTime: dateTime,
                     totalSeats: int.parse(seatsController.text), // Recommend ko na i change ninyo ang int.parse to int.tryparse para ma error handle ninyo if mu butang man ug text ang user sa price
-                    ticketPrice: int.parse(priceController.text),isAircon: true));
+                    ticketPrice: int.parse(priceController.text),
+                    isAircon: isAircon //checker aircon bus
+                ) //
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Bus Route Added (Demo)')),
                 );
