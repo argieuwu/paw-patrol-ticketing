@@ -1,5 +1,4 @@
 import 'package:capstone2/data/data_sources/UserTicketDatabase.dart';
-import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';

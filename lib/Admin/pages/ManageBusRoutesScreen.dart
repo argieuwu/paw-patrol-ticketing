@@ -1,5 +1,7 @@
+import 'package:capstone2/Admin/pages/ViewBookingsScreen.dart';
 import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
 import 'package:capstone2/data/model/AdminBusTicket.dart';
+import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +14,22 @@ class ManageBusRoutesScreen extends StatefulWidget {
 
 class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
   late Stream<QuerySnapshot> adminTickets;
+  List<UserBusTicket> allUserTickets = [];
 
   @override
   void initState() {
-    adminTickets = AdminTicketController().getTickets();
     super.initState();
+    adminTickets = AdminTicketController().getTickets();
+    fetchAllUserTickets();
+  }
+
+  Future<void> fetchAllUserTickets() async {
+    final snapshot = await FirebaseFirestore.instance.collectionGroup('tickets').get();
+    setState(() {
+      allUserTickets = snapshot.docs
+          .map((doc) => UserBusTicket.fromJSON(doc.data()))
+          .toList();
+    });
   }
 
   void _showEditDialog(AdminBusTicket ticket) {
@@ -36,26 +49,11 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
             title: const Text('Edit Bus Route'),
             content: SingleChildScrollView(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: originController,
-                    decoration: const InputDecoration(labelText: 'Origin'),
-                  ),
-                  TextField(
-                    controller: destinationController,
-                    decoration: const InputDecoration(labelText: 'Destination'),
-                  ),
-                  TextField(
-                    controller: seatsController,
-                    decoration: const InputDecoration(labelText: 'Total Seats'),
-                    keyboardType: TextInputType.number,
-                  ),
-                  TextField(
-                    controller: priceController,
-                    decoration: const InputDecoration(labelText: 'Ticket Price'),
-                    keyboardType: TextInputType.number,
-                  ),
+                  TextField(controller: originController, decoration: const InputDecoration(labelText: 'Origin')),
+                  TextField(controller: destinationController, decoration: const InputDecoration(labelText: 'Destination')),
+                  TextField(controller: seatsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Total Seats')),
+                  TextField(controller: priceController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Ticket Price')),
                   ElevatedButton(
                     onPressed: () async {
                       final DateTime? picked = await showDatePicker(
@@ -97,10 +95,7 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
               TextButton(
                 onPressed: () async {
                   try {
@@ -112,9 +107,7 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
                       ticketPrice: int.parse(priceController.text),
                       isAircon: isAircon,
                     );
-
                     await AdminTicketController().updatedAdminTicket(updatedTicket);
-
                     if (mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -141,132 +134,123 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Bus Routes'),
-        backgroundColor: Colors.blue,
-      ),
-      body: Column(
-        children: [
-          Flexible(
-            child: StreamBuilder(
-              stream: adminTickets,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No routes available"));
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+      appBar: AppBar(title: const Text('Manage Bus Routes'), backgroundColor: Colors.blue),
+      body: StreamBuilder(
+        stream: adminTickets,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text("No routes available"));
+          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
 
-                List<AdminBusTicket> tickets = snapshot.data!.docs.map((e) {
-                  return AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>);
-                }).toList();
+          List<AdminBusTicket> tickets = snapshot.data!.docs.map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>)).toList();
 
-                return Container(
-                  height: 280,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: tickets.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Route #${index + 1}'),
-                              Text('From: ${tickets[index].destination[0]}'),
-                              Text('To: ${tickets[index].destination[1]}'),
-                              Text('Departure: ${tickets[index].departureTime.toString().substring(0, 16)}'),
-                              Text('Seats: ${tickets[index].totalSeats}'),
-                              Text('Price: ₱${tickets[index].ticketPrice}'),
-                              Text('Air Condition: ${tickets[index].isAircon ? 'Yes' : 'No'}'),
-                              SizedBox(height: 30),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      final confirmDelete = await showDialog<bool>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Confirm Delete'),
-                                          content: const Text('Are you sure you want to delete this bus route?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context, false),
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context, true),
-                                              child: const Text(
-                                                'Delete',
-                                                style: TextStyle(color: Colors.red),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
+          return ListView.builder(
+            itemCount: tickets.length,
+            itemBuilder: (context, index) {
+              final route = tickets[index];
+              final bookingsForRoute = allUserTickets.where((ticket) =>
+              ticket.data.destination[0] == route.destination[0] &&
+                  ticket.data.destination[1] == route.destination[1] &&
+                  ticket.data.departureTime == route.departureTime).toList();
 
-                                      if (confirmDelete == true) {
-                                        try {
-                                          await AdminTicketController().deleteAdminTicket(tickets[index]);
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Route deleted successfully')),
-                                            );
-                                          }
-                                        } catch (e) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Error deleting route: $e')),
-                                            );
-                                          }
-                                        }
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.redAccent,
-                                    ),
-                                    child: const Text(
-                                      'Delete',
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    onPressed: () => _showEditDialog(tickets[index]),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blueAccent,
-                                    ),
-                                    child: const Text('Edit',
-                                      style: TextStyle(
-                                          color: Colors.black
-                                      ),),
-                                  ),
-                                ],
-                              ),
-                            ],
+              return Card(
+                margin: const EdgeInsets.all(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Hero(
+                        tag: 'routeHero-${route.ticketId}',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Departure: ${route.departureTime.toString().substring(0, 16)}'),
+                      Text('Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
+                      Text('Aircon: ${route.isAircon ? 'Yes' : 'No'}'),
+                      const SizedBox(height: 10),
+
+                      // Button Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _showEditDialog(route),
+                              style: ElevatedButton.styleFrom(),
+                              child: const Text('Edit',style: TextStyle(
+                                  color: Colors.black
+                              )
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Delete Route'),
+                                    content: const Text('Are you sure?'),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await AdminTicketController().deleteAdminTicket(route);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Route deleted successfully')),
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(),
+                              child: const Text('Delete', style: TextStyle(color: Colors.red ),),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // View Bookings Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ViewBookingsPage(
+                                  route: route,
+                                  bookings: bookingsForRoute,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(),
+                          child: const Text(
+                            'View Bookings',
+                            style: TextStyle(
+                                color: Colors.black
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

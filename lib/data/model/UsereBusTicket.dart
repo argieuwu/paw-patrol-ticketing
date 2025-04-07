@@ -42,25 +42,23 @@ class UserBusTicket {
 
 
   // CHANGE 2: Completely revamped fromJSON to handle all edge cases
-  factory UserBusTicket.fromJSON(Map<String,dynamic> map){
-    // STEP 1: Safely handle the bus data field
-    // Initialize an empty map as fallback
+  factory UserBusTicket.fromJSON(Map<String, dynamic> map) {
+    // Step 1: Prepare the nested data
     Map<String, dynamic> busData = {};
-
-    // Only try to convert the bus data if it exists and is actually a Map
-    // This prevents crashes when the data structure is unexpected
     if (map['bus data'] != null && map['bus data'] is Map) {
-      busData = Map<String, dynamic>.from(map['bus data']);
+      final outer = Map<String, dynamic>.from(map['bus data']);
+      if (outer['data'] != null && outer['data'] is Map) {
+        busData = Map<String, dynamic>.from(outer['data']);
+      }
     }
 
-    // STEP 2: Create the UserBusTicket with null safety
     return UserBusTicket(
-      // Handle all fields with null safety using ?? operator
-        userTicketId: map['user ticket id'], // This can be null as per the model
-        email: map['email'] ?? '', // Default to empty string if null
-        data: AdminBusTicket.fromJSON(busData), // Use our safely prepared busData
-        isPaid: map['isPaid'] ?? false, // Default to false if null
-        seat: map['seat'] ?? 0 // Default to 0 if null
+      userTicketId: map['user ticket id'],
+      email: map['email'] ?? '',
+      data: AdminBusTicket.fromJSON(busData),
+      isPaid: map['isPaid'] ?? false,
+      seat: map['seat'] ?? 0,
     );
   }
+
 }
