@@ -51,18 +51,21 @@ class AdminBusTicket {
   }
 
   factory AdminBusTicket.fromJSON(Map<String, dynamic> json) {
-    final data = json['data'] ?? json; // supports nested or direct map
+    final data = json['data'] ?? json;
 
     return AdminBusTicket(
-      ticketId: data['ticket id'] ?? '',
-      destination: List<String>.from(data['destination'] ?? ['', '']),
+      ticketId: data['ticket id']?.toString() ?? '',
+      destination: (data['destination'] != null && data['destination'] is List)
+          ? List<String>.from(data['destination'])
+          : ['', ''],
       departureTime: (data['departure time'] != null && data['departure time'] is Timestamp)
           ? (data['departure time'] as Timestamp).toDate()
-          : DateTime.now(), // Fallback default
+          : DateTime.now(),
       totalSeats: data['total seats'] ?? 0,
       ticketPrice: data['ticket price'] ?? 0,
       isAircon: data['aircon'] ?? false,
     );
   }
+
 
 }

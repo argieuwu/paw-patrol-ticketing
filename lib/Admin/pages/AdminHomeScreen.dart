@@ -2,7 +2,6 @@ import 'package:capstone2/Admin/pages/AddBusRouteScreen.dart';
 import 'package:capstone2/Admin/pages/ManageBusRoutesScreen.dart';
 import 'package:capstone2/Admin/pages/MarkTripCompletedScreen.dart';
 import 'package:capstone2/Admin/pages/ScanQRScreen.dart';
-import 'package:capstone2/Admin/pages/ViewBookingsScreen.dart';
 import 'package:flutter/material.dart';
 
 class AdminHomeScreen extends StatelessWidget {
@@ -43,18 +42,6 @@ class AdminHomeScreen extends StatelessWidget {
 
           ),
 
-          SizedBox(height: 16),
-          ElevatedButton(
-              onPressed: (){
-            Navigator.push(context,
-                MaterialPageRoute(
-                    builder: (context) => ViewBookingsScreen()
-                )
-            );
-          },
-
-            child: Text('View Bookings'),
-          ),
           SizedBox(height: 16),
           ElevatedButton(
               onPressed: (){
