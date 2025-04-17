@@ -112,12 +112,16 @@ class _TestingState extends State<Testing> {
                 // AdminBusTicket adminTickets = AdminBusTicket.fromJSON(tickets[index].data.toJson());
                 return Card(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 10,
                     children: [
-                    Text(tickets[index].email),
-                      Text('is Paid : ${tickets[index].isPaid.toString()}'),
-                      Text(tickets[index].seat.toString()),
-                      Text(tickets[index].userTicketId.toString()),
+                    // Text(tickets[index].email),
+                    //   Text('is Paid : ${tickets[index].isPaid.toString()}'),
+                    //   Text(tickets[index].seat.toString()),
+                    //   Text(tickets[index].userTicketId.toString()),
+                      Text(
+                          'NAAS TICKET PAGE KENT'
+                      )
                       // Text(adminTickets.destination[0]),
                       // Text(adminTickets.destination[1]),
                       // Text(adminTickets.departureTime.toString()),
