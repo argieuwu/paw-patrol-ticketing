@@ -12,6 +12,20 @@ class UserTicketDatabase{
   }
   
   Stream<QuerySnapshot> getUserTickets() {
-    return db.collection('user').doc(auth.currentUser!.uid).collection('tickets').snapshots();
+    return db
+        .collection('user')
+        .doc(auth.currentUser!.uid)
+        .collection('tickets')
+        .snapshots();
   }
+
+  Stream<QuerySnapshot> getCompletedUserTickets() {
+    return db
+        .collection('user')
+        .doc(auth.currentUser!.uid)
+        .collection('tickets')
+        .where('bus data.data.isCompleted', isEqualTo: true)
+        .snapshots();
+  }
+
 }
