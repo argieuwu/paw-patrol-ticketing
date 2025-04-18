@@ -7,22 +7,25 @@ import 'package:flutter/cupertino.dart';
 class UserTicketController{
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-
   Future<void> uploadUserTicket(UserBusTicket ticket) async {
-    try{
-     await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
-    }
-    catch(e){
-      debugPrint('Uploading User data failed: $e');
-    }
+    try {
 
+      // Upload to User-level nested collection
+      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
+
+      // Also upload to root-level collection for seat monitoring
+      await FirebaseFirestore.instance.collection('UserBusTickets').add(ticket.toJSON());
+    } catch (e) {
+      print("Error uploading user ticket: $e");
+    }
   }
+
   Stream<QuerySnapshot> getUserTickets(){
     return UserTicketDatabase().getUserTickets();
   }
 
   Stream<QuerySnapshot> getCompletedUserTickets() {
-    return UserTicketDatabase().getUserTickets();
+    return UserTicketDatabase().getCompletedUserTickets();
   }
 
   Future<void> deleteUserTicket(String ticketId) async {
@@ -37,6 +40,4 @@ class UserTicketController{
       debugPrint("Error deleting user ticket: $e");
     }
   }
-
-
 }
