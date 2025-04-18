@@ -47,7 +47,7 @@ class BusHistoryPage extends StatelessWidget {
     UserTicketController().getUserTickets();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Trip History")),
+      appBar: AppBar(title: const Text("Bus Ticket History")),
       body: StreamBuilder<QuerySnapshot>(
         stream: userTickets,
         builder: (context, snapshot) {
