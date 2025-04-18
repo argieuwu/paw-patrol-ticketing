@@ -28,7 +28,13 @@ class AdminTicketController {
     } catch(e){
       debugPrint("Error Controller update: $e");
     }
-
 }
+  Future<void> updateTicketStatus(AdminBusTicket ticket, bool isCompleted) async {
+    try {
+      await ticketDatabase.updateTicketStatus(ticket.ticketId!, isCompleted);
+    } catch (e) {
+      debugPrint("Error updating ticket status: $e");
+    }
+  }
 
 }

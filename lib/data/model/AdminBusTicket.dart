@@ -7,6 +7,8 @@ class AdminBusTicket {
   final int ticketPrice;
   final String? ticketId;
   final bool isAircon;
+  final bool isCompleted; // Add this field
+
 
   AdminBusTicket(
       {required this.ticketId,
@@ -14,7 +16,9 @@ class AdminBusTicket {
       required this.departureTime,
       required this.totalSeats,
       required this.ticketPrice,
-      required this.isAircon});
+      required this.isAircon,
+      this.isCompleted = false, // Constructor should take this as well
+      });
 
   AdminBusTicket.noID(
       {this.ticketId,
@@ -22,7 +26,9 @@ class AdminBusTicket {
       required this.departureTime,
       required this.totalSeats,
       required this.ticketPrice,
-      required this.isAircon});
+      required this.isAircon,
+        this.isCompleted = false,
+      });
 
   Map<String, dynamic> toJson() {
     return {
@@ -32,7 +38,8 @@ class AdminBusTicket {
         "departure time": departureTime,
         "total seats": totalSeats,
         "ticket price": ticketPrice,
-        "aircon": isAircon
+        "aircon": isAircon,
+        "isCompleted": isCompleted,
       }
     };
   }
@@ -45,7 +52,9 @@ class AdminBusTicket {
         "departure time": departureTime,
         "total seats": totalSeats,
         "ticket price": ticketPrice,
-        "aircon": isAircon
+        "aircon": isAircon,
+        "isCompleted": isCompleted, // Save the completed status
+
       }
     };
   }
@@ -64,6 +73,7 @@ class AdminBusTicket {
       totalSeats: data['total seats'] ?? 0,
       ticketPrice: data['ticket price'] ?? 0,
       isAircon: data['aircon'] ?? false,
+      isCompleted: data['isCompleted'] ?? false,
     );
   }
 
