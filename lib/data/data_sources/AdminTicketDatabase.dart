@@ -32,10 +32,16 @@ class AdminTicketDatabase {
         'data.total seats': ticket.totalSeats,
         'data.ticket price': ticket.ticketPrice,
         'data.aircon': ticket.isAircon,
+        'data.isCompleted': ticket.isCompleted, // Update completed status
+
       });
     } catch (e) {
       debugPrint("Error updating ticket in database: $e");
     }
+  }
+
+  Future<void> updateTicketStatus(String ticketId, bool isCompleted) async {
+    await db.collection('admin').doc(ticketId).update({'data.isCompleted': isCompleted});
   }
 
 
