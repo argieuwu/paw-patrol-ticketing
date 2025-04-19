@@ -1,4 +1,5 @@
 import 'package:capstone2/data/model/AdminBusTicket.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserBusTicket {
   final String email;
@@ -41,9 +42,9 @@ class UserBusTicket {
   // }
 
 
-  // CHANGE 2: Completely revamped fromJSON to handle all edge cases
-  factory UserBusTicket.fromJSON(Map<String, dynamic> map) {
-    // Step 1: Prepare the nested data
+  factory UserBusTicket.fromJSON(DocumentSnapshot doc) {
+    final map = doc.data() as Map<String, dynamic>;
+
     Map<String, dynamic> busData = {};
     if (map['bus data'] != null && map['bus data'] is Map) {
       final outer = Map<String, dynamic>.from(map['bus data']);
@@ -53,12 +54,13 @@ class UserBusTicket {
     }
 
     return UserBusTicket(
-      userTicketId: map['user ticket id'],
+      userTicketId: doc.id,
       email: map['email'] ?? '',
       data: AdminBusTicket.fromJSON(busData),
       isPaid: map['isPaid'] ?? false,
       seat: map['seat'] ?? 0,
     );
   }
+
 
 }

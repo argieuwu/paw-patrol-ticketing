@@ -12,8 +12,7 @@ class TicketScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> userTickets =
-    UserTicketController().getUserTickets();
+    final Stream<QuerySnapshot> userTickets = UserTicketController().getUserTickets();
 
     return Scaffold(
       backgroundColor: AppStyle.bgColor,
@@ -24,28 +23,26 @@ class TicketScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             Row(
-             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Tickets", style: TextStyle(
+                const Text(
+                  "Tickets",
+                  style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
-                    fontSize: 18
-                 ),
+                    fontSize: 18,
+                  ),
                 ),
                 IconButton(
-                  icon: Icon(
-                  Icons.history,
-                    color: Colors.black,
-                  ),
+                  icon: const Icon(Icons.history, color: Colors.black),
                   tooltip: 'View History',
-                  onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => BusHistoryPage()
-                    )
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BusHistoryPage()),
                     );
                   },
-                  ),
-
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -60,11 +57,11 @@ class TicketScreen extends StatelessWidget {
                   }
 
                   final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day); // today at 00:00
+                  final today = DateTime(now.year, now.month, now.day);
 
-                  final tickets = snapshot.data!.docs.map((e) {
+                  final tickets = snapshot.data!.docs.map((doc) {
                     try {
-                      return UserBusTicket.fromJSON(e.data() as Map<String, dynamic>);
+                      return UserBusTicket.fromJSON(doc);
                     } catch (err) {
                       log("Error parsing ticket: $err");
                       return null;
@@ -103,7 +100,7 @@ class TicketScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Ticket ID: ${userTicket.userTicketId}"),
-                              Text("Paid: ${userTicket.isPaid}"),
+                              Text("Paid: ${userTicket.isPaid ? "Yes" : "No"}"),
                               Text("Seat No: ${userTicket.seat}"),
                               const Divider(),
                               Text("Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}"),
@@ -120,7 +117,6 @@ class TicketScreen extends StatelessWidget {
                 },
               ),
             ),
-
           ],
         ),
       ),

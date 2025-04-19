@@ -63,7 +63,7 @@ class BusHistoryPage extends StatelessWidget {
           final completedTickets = snapshot.data!.docs
               .map((e) {
             try {
-              return UserBusTicket.fromJSON(e.data() as Map<String, dynamic>);
+              return UserBusTicket.fromJSON(e);
             } catch (_) {
               return null;
             }
