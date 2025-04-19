@@ -1,7 +1,7 @@
+import 'package:capstone2/data/services/TicketService.dart';
+import 'package:flutter/material.dart';
 import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
 import 'package:capstone2/data/controllers/UserTicket_data_controller.dart';
 import 'package:capstone2/data/model/AdminBusTicket.dart';
@@ -16,6 +16,7 @@ class Testing extends StatefulWidget {
 class _TestingState extends State<Testing> {
   late Stream<QuerySnapshot> adminTickets;
   late Stream<QuerySnapshot> userTickets;
+  final TicketService _ticketService = TicketService();
 
   @override
   void initState() {
@@ -25,18 +26,7 @@ class _TestingState extends State<Testing> {
   }
 
   Future<int?> showSeatPickerDialog(BuildContext context, AdminBusTicket ticket) async {
-    // Fetch all user tickets to check for booked seats
-    final snapshot = await FirebaseFirestore.instance.collection('UserBusTickets').get();
-
-    // Extract taken seats for the specific admin ticket
-    final takenSeats = snapshot.docs
-        .map((e) => UserBusTicket.fromJSON(e.data())) // Convert docs to UserBusTicket
-        .where((userTicket) =>
-    userTicket.data.destination[0] == ticket.destination[0] &&
-        userTicket.data.destination[1] == ticket.destination[1] &&
-        userTicket.data.departureTime == ticket.departureTime) // Ensure same trip
-        .map((userTicket) => userTicket.seat) // Get booked seat numbers
-        .toSet(); // Use a Set to ensure uniqueness
+    final takenSeats = await _ticketService.getTakenSeats(ticket);
 
     return showDialog<int>(
       context: context,
@@ -54,15 +44,11 @@ class _TestingState extends State<Testing> {
                 crossAxisSpacing: 10,
               ),
               itemBuilder: (context, index) {
-                int seatNumber = index + 1; // Seat number starts from 1
-                bool isTaken = takenSeats.contains(seatNumber); // Check if this seat is taken
+                int seatNumber = index + 1;
+                bool isTaken = takenSeats.contains(seatNumber);
 
                 return ElevatedButton(
-                  onPressed: isTaken
-                      ? null // Disable button if seat is taken
-                      : () {
-                    Navigator.of(context).pop(seatNumber); // Select seat if not taken
-                  },
+                  onPressed: isTaken ? null : () => Navigator.pop(context, seatNumber),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isTaken ? Colors.grey : Colors.blue,
                   ),
@@ -95,18 +81,16 @@ class _TestingState extends State<Testing> {
                 return const Text("Empty Data");
               }
 
-              List<AdminBusTicket> tickets = snapshot.data!.docs.map(
-                    (e) {
-                  return AdminBusTicket.fromJSON(
-                      e.data() as Map<String, dynamic>);
-                },
-              ).toList();
+              List<AdminBusTicket> tickets = snapshot.data!.docs
+                  .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
+                  .toList();
 
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: tickets.length,
                 itemBuilder: (BuildContext context, int index) {
                   final ticket = tickets[index];
+
                   return Card(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -118,37 +102,31 @@ class _TestingState extends State<Testing> {
                         Text('Seats: ${ticket.totalSeats}'),
                         Text('Price: ₱${ticket.ticketPrice}'),
                         Text('Aircon: ${ticket.isAircon}'),
+                        const SizedBox(height: 20),
 
-                        SizedBox(height: 20),
-                        // DELETE
                         ElevatedButton(
-                          onPressed: () {
-                            AdminTicketController().deleteAdminTicket(ticket);
-                          },
+                          onPressed: () => AdminTicketController().deleteAdminTicket(ticket),
                           child: const Text('Delete'),
                         ),
-                        SizedBox(height: 10),
-                        // EDIT
+                        const SizedBox(height: 10),
+
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {}, // Edit handler here
                           child: const Text('Edit'),
                         ),
-                        SizedBox(height: 10),
-                        // BOOK TICKET
+                        const SizedBox(height: 10),
+
                         ElevatedButton(
                           onPressed: () async {
                             final selectedSeat = await showSeatPickerDialog(context, ticket);
                             if (selectedSeat != null) {
-                              await UserTicketController().uploadUserTicket(
-                                UserBusTicket.noID(
-                                  email: FirebaseAuth.instance.currentUser!.email.toString(),
-                                  data: ticket,
-                                  isPaid: false,
-                                  seat: selectedSeat,
-                                ),
-                              );
+                              await _ticketService.bookTicket(ticket, selectedSeat);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Seat #$selectedSeat booked successfully!')),
+                                SnackBar(
+                                    content: Text(
+                                        'Seat #$selectedSeat booked successfully!'
+                                    )
+                                ),
                               );
                             }
                           },
@@ -162,9 +140,8 @@ class _TestingState extends State<Testing> {
             },
           ),
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
 
-        // USER TICKETS SECTION
         Flexible(
           child: StreamBuilder(
             stream: userTickets,
@@ -176,7 +153,7 @@ class _TestingState extends State<Testing> {
               }
 
               final userTicketsList = snapshot.data!.docs
-                  .map((e) => UserBusTicket.fromJSON(e.data() as Map<String, dynamic>))
+                  .map((e) => UserBusTicket.fromJSON(e))
                   .toList();
 
               return ListView.builder(
@@ -188,8 +165,10 @@ class _TestingState extends State<Testing> {
                     children: [
                       Card(
                           child: Text(
-                              'NAAS TICKET PAGE KENT'
-                          )
+                          'Ticket from ${userTicket.data.destination[0]} '
+                              'to ${userTicket.data.destination[1]}'
+                              ' - Seat: ${userTicket.seat}'
+                      )
                       ),
                     ],
                   );
