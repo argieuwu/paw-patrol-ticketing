@@ -12,60 +12,53 @@ class AdminHomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Admin Dashboard'),
-        backgroundColor: Colors.blue,
       ),
-      body: Padding(padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElevatedButton(
-              onPressed:(){
-            Navigator.push(context,
-                MaterialPageRoute(
-                    builder: (context) => AddBusRouteScreen()
-                )
-            );
-          },
-            child: Text('Add Bus Route'),
-          ),
-
-          SizedBox(height: 16),
-          ElevatedButton(
-            onPressed:(){
-              Navigator.push(context,
-                  MaterialPageRoute(
-                      builder: (context) => ManageBusRoutesScreen()
-                  )
-              );
-            },
-            child: Text('Manage Current Bus Routes'),
-
-          ),
-
-          SizedBox(height: 16),
-          ElevatedButton(
-              onPressed: (){
-                Navigator.push(
-                    context, MaterialPageRoute(
-                    builder: (context) => ScanQRScreen()
-                )
-                );
-              },
-            child: Text('Scan QR Code'),
-              ),
-          SizedBox(height: 16.0),
-          ElevatedButton(
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    context, MaterialPageRoute(
-                    builder: (context) => MarkTripCompletedScreen()
-                )
+                  context,
+                  MaterialPageRoute(builder: (context) => AddBusRouteScreen()),
                 );
               },
-          child: Text('Mark Trip Completed'),
-          )
-        ],
-      ),
+              child: Text('Add Bus Route'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManageBusRoutesScreen()),
+                );
+              },
+              child: Text('Manage Current Bus Routes'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScanQRScreen()),
+                );
+              },
+              child: Text('Scan QR Code'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CompletedBusRoutesScreen()),
+                );
+              },
+              child: Text('View Completed Trips'),
+            ),
+          ],
+        ),
       ),
     );
   }

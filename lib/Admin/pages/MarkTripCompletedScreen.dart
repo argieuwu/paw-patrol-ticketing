@@ -1,146 +1,96 @@
-import 'package:capstone2/Admin/pages/ManageBusRoutesScreen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:capstone2/data/model/AdminBusTicket.dart';
+import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
+import 'package:intl/intl.dart';
 
-class MarkTripCompletedScreen extends StatefulWidget {
-  const MarkTripCompletedScreen({super.key});
+class CompletedBusRoutesScreen extends StatelessWidget {
+  const CompletedBusRoutesScreen({super.key});
 
-  @override
-  State<MarkTripCompletedScreen> createState() => _MarkTripCompletedScreenState();
-}
-
-class _MarkTripCompletedScreenState extends State<MarkTripCompletedScreen> {
   @override
   Widget build(BuildContext context) {
-    // Stream to fetch all bus routes from Firestore (both completed and pending)
-    Stream<QuerySnapshot> tripsStream = FirebaseFirestore.instance
-        .collection('busRoutes') // Assuming bus routes are stored in a collection called 'busRoutes'
-        .snapshots();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Bus Trips'),
-        backgroundColor: Colors.blue,
-      ),
-      body: StreamBuilder(
-        stream: tripsStream,
+          title: const Text(
+              'Completed Bus Travels'
+          ),
+          ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('admin').snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+
+          final now = DateTime.now();
+          final tickets = snapshot.data?.docs
+              .map((doc) => AdminBusTicket.fromJSON(doc.data() as Map<String, dynamic>))
+              .toList() ??
+              [];
+
+          // Update status for past trips and filter completed ones
+          final completedTrips = <AdminBusTicket>[];
+          for (var ticket in tickets) {
+            if (ticket.departureTime.isBefore(now) && !ticket.isCompleted) {
+              AdminTicketController().updateTicketStatus(ticket, true);
+            }
+            if (ticket.isCompleted || ticket.departureTime.isBefore(now)) {
+              completedTrips.add(ticket);
+            }
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No bus routes found.'));
-          }
+          if (completedTrips.isEmpty) return const Center(child: Text('No completed bus travels.'));
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          List<QueryDocumentSnapshot> allTrips = snapshot.data!.docs;
-
-          // Separate completed and pending trips
-          List<QueryDocumentSnapshot> pendingTrips = allTrips.where((trip) {
-            var data = trip.data() as Map<String, dynamic>;
-            return data['isCompleted'] == false;
-          }).toList();
-
-          List<QueryDocumentSnapshot> completedTrips = allTrips.where((trip) {
-            var data = trip.data() as Map<String, dynamic>;
-            return data['isCompleted'] == true;
-          }).toList();
-
-          return ListView(
-            children: [
-              if (pendingTrips.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Pending Trips',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                for (var trip in pendingTrips)
-                  _buildTripCard(context, trip, false),
-                const SizedBox(height: 16),
-              ],
-              if (completedTrips.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'Completed Trips',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                for (var trip in completedTrips)
-                  _buildTripCard(context, trip, true),
-              ],
-            ],
+          return ListView.builder(
+            itemCount: completedTrips.length,
+            itemBuilder: (context, index) => _buildTicketCard(context, completedTrips[index]),
           );
         },
       ),
     );
   }
 
-  Widget _buildTripCard(BuildContext context, QueryDocumentSnapshot trip, bool isCompleted) {
-    var data = trip.data() as Map<String, dynamic>;
-    String busRoute = data['busRoute'] ?? 'Unknown';
-    String departureTime = data['departureTime'] ?? 'N/A';
-    bool isTripCompleted = data['isCompleted'] ?? false;
+  Widget _buildTicketCard(BuildContext context, AdminBusTicket ticket) {
+    final formattedTime = DateFormat('yyyy-MM-dd – HH:mm').format(ticket.departureTime);
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        title: Text('Route: ${ticket.destination.join(" → ")}'),
+        subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Bus Route: $busRoute',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text('Departure: $departureTime'),
-            Text('Status: ${isTripCompleted ? 'Completed' : 'Pending'}'),
-            const Divider(),
-            if (!isTripCompleted)
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    // Mark the trip as completed in Firestore
-                    await FirebaseFirestore.instance
-                        .collection('busRoutes')
-                        .doc(trip.id)
-                        .update({'isCompleted': true});
-
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Trip marked as completed')),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error marking trip: $e')),
-                      );
-                    }
-                  }
-                },
-                child: const Text('Mark Completed'),
-              ),
-            if (!isTripCompleted)
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to ManageBusRoutesScreen for pending bus routes
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ManageBusRoutesScreen(),
-                    ),
-                  );
-                },
-                child: const Text('Manage Route'),
-              ),
+            const SizedBox(height: 6),
+            Text('Departure: $formattedTime'),
+            const SizedBox(height: 6),
+            Text('Price: ₱${ticket.ticketPrice}'),
+            Text('Aircon: ${ticket.isAircon ? "Yes" : "No"}'),
+            const SizedBox(height: 6),
+            const Text('Status: ✅ Completed',
+                style: TextStyle()),
           ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete, color: Colors.red),
+          onPressed: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Delete Route'),
+                content: const Text('Are you sure you want to delete this completed route?'),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                  TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                ],
+              ),
+            );
+            if (confirm == true) {
+              await AdminTicketController().deleteAdminTicket(ticket);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Completed route deleted')));
+            }
+          },
         ),
       ),
     );
