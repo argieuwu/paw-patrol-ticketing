@@ -165,9 +165,7 @@ class _TestingState extends State<Testing> {
                     children: [
                       Card(
                           child: Text(
-                          'Ticket from ${userTicket.data.destination[0]} '
-                              'to ${userTicket.data.destination[1]}'
-                              ' - Seat: ${userTicket.seat}'
+                          'NAAS TICKET PAGE KENT HAHAHHAHA '
                       )
                       ),
                     ],
