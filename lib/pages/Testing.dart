@@ -67,115 +67,134 @@ class _TestingState extends State<Testing> {
     );
   }
 
+  Widget _buildRouteList(List<AdminBusTicket> tickets) {
+    if (tickets.isEmpty) {
+      return const Center(child: Text("No upcoming routes available"));
+    }
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: tickets.length,
+      itemBuilder: (BuildContext context, int index) {
+        final ticket = tickets[index];
+
+        return Card(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Ticket #${index + 1}'),
+              Text('From: ${ticket.destination[0]}'),
+              Text('To: ${ticket.destination[1]}'),
+              Text('Departure: ${ticket.departureTime}'),
+              Text('Seats: ${ticket.totalSeats}'),
+              Text('Price: ₱${ticket.ticketPrice}'),
+              Text('Aircon: ${ticket.isAircon}'),
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () async {
+                  final selectedSeat = await showSeatPickerDialog(context, ticket);
+                  if (selectedSeat != null) {
+                    await _ticketService.bookTicket(ticket, selectedSeat);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Seat #$selectedSeat booked successfully!')
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Book Ticket'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(
-          child: StreamBuilder(
-            stream: adminTickets,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (!snapshot.hasData || snapshot.data == null) {
-                return const Text("Empty Data");
-              }
-
-              List<AdminBusTicket> tickets = snapshot.data!.docs
-                  .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
-                  .toList();
-
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: tickets.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final ticket = tickets[index];
-
-                  return Card(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Ticket #${index + 1}'),
-                        Text('From: ${ticket.destination[0]}'),
-                        Text('To: ${ticket.destination[1]}'),
-                        Text('Departure: ${ticket.departureTime}'),
-                        Text('Seats: ${ticket.totalSeats}'),
-                        Text('Price: ₱${ticket.ticketPrice}'),
-                        Text('Aircon: ${ticket.isAircon}'),
-                        const SizedBox(height: 20),
-
-                        ElevatedButton(
-                          onPressed: () => AdminTicketController().deleteAdminTicket(ticket),
-                          child: const Text('Delete'),
-                        ),
-                        const SizedBox(height: 10),
-
-                        ElevatedButton(
-                          onPressed: () {}, // Edit handler here
-                          child: const Text('Edit'),
-                        ),
-                        const SizedBox(height: 10),
-
-                        ElevatedButton(
-                          onPressed: () async {
-                            final selectedSeat = await showSeatPickerDialog(context, ticket);
-                            if (selectedSeat != null) {
-                              await _ticketService.bookTicket(ticket, selectedSeat);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Seat #$selectedSeat booked successfully!'
-                                    )
-                                ),
-                              );
-                            }
-                          },
-                          child: const Text('Book Ticket'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Column(
+        children: [
+          Text('Available Bus Trip',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold
+            ),
           ),
-        ),
-        const SizedBox(height: 40),
+          const SizedBox(height: 20),
+          Expanded(
+            child: StreamBuilder(
+              stream: adminTickets,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Center(child: Text("No routes available"));
+                }
 
-        Flexible(
-          child: StreamBuilder(
-            stream: userTickets,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (!snapshot.hasData || snapshot.data == null) {
-                return const Text("No Tickets Booked");
-              }
+                final allTickets = snapshot.data!.docs
+                    .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
+                    .toList();
 
-              final userTicketsList = snapshot.data!.docs
-                  .map((e) => UserBusTicket.fromJSON(e))
-                  .toList();
+                final upcomingTickets = allTickets.where((ticket) {
+                  return ticket.departureTime.isAfter(DateTime.now()) && !ticket.isCompleted;
+                }).toList();
 
-              return ListView.builder(
-                itemCount: userTicketsList.length,
-                itemBuilder: (context, index) {
-                  final userTicket = userTicketsList[index];
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Card(
-                          child: Text(
-                          'NAAS TICKET PAGE KENT HAHAHHAHA '
-                      )
+                return _buildRouteList(upcomingTickets);
+              },
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          Text('User Booked Tickets'),
+          const SizedBox(height: 20),
+
+          Expanded(
+            child: StreamBuilder(
+              stream: userTickets,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Center(child: Text("No Tickets Booked"));
+                }
+
+                final userTicketsList = snapshot.data!.docs
+                    .map((e) => UserBusTicket.fromJSON(e))
+                    .toList();
+
+                return ListView.builder(
+                  itemCount: userTicketsList.length,
+                  itemBuilder: (context, index) {
+                    final userTicket = userTicketsList[index];
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Ticket ID: ${userTicket.userTicketId}'),
+                            Text('From: ${userTicket.data.destination[0]}'),
+                            Text('To: ${userTicket.data.destination[1]}'),
+                            Text('Departure: ${userTicket.data.departureTime}'),
+                            Text('Seat: ${userTicket.seat}'),
+                            Text('Status: ${userTicket.isPaid ? 'Paid' : 'Unpaid'}'),
+                          ],
+                        ),
                       ),
-                    ],
-                  );
-                },
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
