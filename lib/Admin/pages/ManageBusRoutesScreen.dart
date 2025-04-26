@@ -12,10 +12,11 @@ class ManageBusRoutesScreen extends StatefulWidget {
   State<ManageBusRoutesScreen> createState() => _ManageBusRoutesScreenState();
 }
 
-class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
+class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with SingleTickerProviderStateMixin {
   late Stream<QuerySnapshot> adminTickets;
   List<UserBusTicket> allUserTickets = [];
   final AdminTicketController _adminController = AdminTicketController();
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -23,6 +24,13 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
     adminTickets = _adminController.getTickets();
     _updateTicketStatuses();
     fetchAllUserTickets();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _updateTicketStatuses() async {
@@ -145,111 +153,153 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> {
     );
   }
 
+  List<AdminBusTicket> _filterTickets(List<AdminBusTicket> tickets, String category) {
+    final now = DateTime.now();
+    return tickets.where((ticket) {
+      if (category == 'upcoming') {
+        return ticket.departureTime.isAfter(now) && !ticket.isCompleted;
+      } else if (category == 'completed') {
+        return ticket.isCompleted ||
+            ticket.departureTime.add(const Duration(hours: 12)).isBefore(now);
+      }
+      return false;
+    }).toList();
+  }
+
+  Widget _buildRouteList(List<AdminBusTicket> tickets) {
+    if (tickets.isEmpty) {
+      return const Center(child: Text("No routes available"));
+    }
+
+    return ListView.builder(
+      itemCount: tickets.length,
+      itemBuilder: (context, index) {
+        final route = tickets[index];
+        final bookings = allUserTickets
+            .where((ticket) =>
+        ticket.data.destination[0] == route.destination[0] &&
+            ticket.data.destination[1] == route.destination[1] &&
+            ticket.data.departureTime == route.departureTime)
+            .toList();
+
+        final isCompleted = route.isCompleted ||
+            route.departureTime.add(const Duration(hours: 12)).isBefore(DateTime.now());
+
+        return Card(
+          margin: const EdgeInsets.all(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text('Departure: ${route.departureTime.toString().substring(0, 16)}'),
+                Text('Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
+                Text('Aircon: ${route.isAircon ? 'Yes' : 'No'}'),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    if (!isCompleted) ...[
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _showEditDialog(route),
+                          child: const Text('Edit', style: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Delete Route'),
+                              content: Text(isCompleted
+                                  ? 'Are you sure you want to delete this completed route? This will also delete all associated bookings.'
+                                  : 'Are you sure you want to delete this route?'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            await _adminController.deleteAdminTicket(route);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Route deleted successfully')));
+                            }
+                          }
+                        },
+                        child: Text('Delete', style: TextStyle(color: isCompleted ? Colors.red : Colors.red)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ViewBookingsPage(route: route, bookings: bookings),
+                        ),
+                      );
+                    },
+                    child: const Text('View Bookings', style: TextStyle(color: Colors.black)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-              'Manage Bus Routes'
-          ),
+        title: const Text('Manage Bus Routes'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Upcoming'),
+            Tab(text: 'Completed'),
+          ],
+        ),
       ),
       body: StreamBuilder(
         stream: adminTickets,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text("No active routes available"));
-          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("No active routes available"));
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-          final tickets = snapshot.data!.docs
+          final allTickets = snapshot.data!.docs
               .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
-              .where((ticket) => !ticket.isCompleted) // Only show non-completed tickets
               .toList();
 
-          if (tickets.isEmpty) return const Center(child: Text("No active routes available"));
-
-          return ListView.builder(
-            itemCount: tickets.length,
-            itemBuilder: (context, index) {
-              final route = tickets[index];
-              final bookings = allUserTickets
-                  .where((ticket) =>
-              ticket.data.destination[0] == route.destination[0] &&
-                  ticket.data.destination[1] == route.destination[1] &&
-                  ticket.data.departureTime == route.departureTime)
-                  .toList();
-
-              return Card(
-                margin: const EdgeInsets.all(12),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('Departure: ${route.departureTime.toString().substring(0, 16)}'),
-                      Text('Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
-                      Text('Aircon: ${route.isAircon ? 'Yes' : 'No'}'),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => _showEditDialog(route),
-                              child: const Text('Edit', style: TextStyle(color: Colors.black)),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Delete Route'),
-                                    content: const Text('Are you sure you want to delete this route?'),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
-                                    ],
-                                  ),
-                                );
-                                if (confirm == true) {
-                                  await _adminController.deleteAdminTicket(route);
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Route deleted successfully')));
-                                  }
-                                }
-                              },
-                              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ViewBookingsPage(route: route, bookings: bookings),
-                              ),
-                            );
-                          },
-                          child: const Text('View Bookings', style: TextStyle(color: Colors.black)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildRouteList(_filterTickets(allTickets, 'upcoming')),
+              _buildRouteList(_filterTickets(allTickets, 'completed')),
+            ],
           );
         },
       ),
