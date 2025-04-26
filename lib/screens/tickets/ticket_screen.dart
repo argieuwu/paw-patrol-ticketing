@@ -66,7 +66,9 @@ class TicketScreen extends StatelessWidget {
                       log("Error parsing ticket: $err");
                       return null;
                     }
-                  }).whereType<UserBusTicket>().where((ticket) {
+                  }).whereType<UserBusTicket>().toList();
+
+                  final ongoingTickets = tickets.where((ticket) {
                     final departure = ticket.data.departureTime;
                     final departureDate = DateTime(
                       departure.year,
@@ -76,43 +78,36 @@ class TicketScreen extends StatelessWidget {
                     return departureDate.isAtSameMomentAs(today) || departureDate.isAfter(today);
                   }).toList();
 
-                  if (tickets.isEmpty) {
-                    return const Center(child: Text("No booked tickets yet."));
-                  }
+                  final completedTickets = tickets.where((ticket) {
+                    final departure = ticket.data.departureTime;
+                    final departureDate = DateTime(
+                      departure.year,
+                      departure.month,
+                      departure.day,
+                    );
+                    return departureDate.isBefore(today);
+                  }).toList();
 
-                  return ListView.builder(
-                    itemCount: tickets.length,
-                    itemBuilder: (context, index) {
-                      final userTicket = tickets[index];
-                      final adminTicket = userTicket.data;
-                      final departure = DateFormat('yyyy-MM-dd – HH:mm')
-                          .format(adminTicket.departureTime);
-
-                      return Card(
-                        elevation: 4,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  return DefaultTabController(
+                    length: 2,
+                    child: Column(
+                      children: [
+                        const TabBar(
+                          tabs: [
+                            Tab(text: 'Ongoing'),
+                            Tab(text: 'Completed'),
+                          ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        Expanded(
+                          child: TabBarView(
                             children: [
-                              Text("Ticket ID: ${userTicket.userTicketId}"),
-                              Text("Paid: ${userTicket.isPaid ? "Yes" : "No"}"),
-                              Text("Seat No: ${userTicket.seat}"),
-                              const Divider(),
-                              Text("Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}"),
-                              Text("Departure: $departure"),
-                              Text("Total Seats: ${adminTicket.totalSeats}"),
-                              Text("Ticket Price: ₱${adminTicket.ticketPrice}"),
-                              Text("Aircon: ${adminTicket.isAircon ? "Yes" : "No"}"),
+                              _buildTicketList(ongoingTickets),
+                              _buildTicketList(completedTickets),
                             ],
                           ),
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   );
                 },
               ),
@@ -120,6 +115,47 @@ class TicketScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTicketList(List<UserBusTicket> tickets) {
+    if (tickets.isEmpty) {
+      return const Center(child: Text("No tickets found"));
+    }
+
+    return ListView.builder(
+      itemCount: tickets.length,
+      itemBuilder: (context, index) {
+        final userTicket = tickets[index];
+        final adminTicket = userTicket.data;
+        final departure = DateFormat('yyyy-MM-dd – HH:mm')
+            .format(adminTicket.departureTime);
+
+        return Card(
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Ticket ID: ${userTicket.userTicketId}"),
+                Text("Paid: ${userTicket.isPaid ? "Yes" : "No"}"),
+                Text("Seat No: ${userTicket.seat}"),
+                const Divider(),
+                Text("Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}"),
+                Text("Departure: $departure"),
+                Text("Total Seats: ${adminTicket.totalSeats}"),
+                Text("Ticket Price: ₱${adminTicket.ticketPrice}"),
+                Text("Aircon: ${adminTicket.isAircon ? "Yes" : "No"}"),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
