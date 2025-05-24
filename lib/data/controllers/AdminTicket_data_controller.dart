@@ -15,14 +15,18 @@ class AdminTicketController {
       debugPrint("Error Controller upload : $e");
     }
   }
+
+ // kwaon niya tanan ticket gikan sa AdminTicketDatabase
   Stream<QuerySnapshot> getTickets(){
     return ticketDatabase.getAllAdminTicket();
   }
 
+  // delete ticket
   Future<void> deleteAdminTicket(AdminBusTicket ticket) async {
     ticketDatabase.deleteAdminTickets(ticket);
   }
 
+  // update ticket
   Future<void> updatedAdminTicket(AdminBusTicket ticket) async{
     try{
       await ticketDatabase.updateAdminTicket(ticket);
@@ -30,6 +34,8 @@ class AdminTicketController {
       debugPrint("Error Controller update: $e");
     }
 }
+
+// update status sa ticket ya
   Future<void> updateTicketStatus(AdminBusTicket ticket, bool isCompleted) async {
     try {
       await ticketDatabase.updateTicketStatus(ticket.ticketId!, isCompleted);
@@ -39,6 +45,8 @@ class AdminTicketController {
   }
 
   // New method to update isCompleted status for all tickets based on departure time
+ //For each ticket, checks if departureTime is before the current time and isCompleted is false.
+  // If true, calls updateTicketStatus to mark the ticket as completed.
   Future<void> updateAllTicketStatuses() async {
     try {
       final now = DateTime.now();
@@ -59,11 +67,12 @@ class AdminTicketController {
       }
     } catch (e) {
       debugPrint("Error updating all ticket statuses: $e");
-      rethrow;
+
     }
   }
 
   // fetch all user tickets for admin purposes
+  //sa view bookings ni na use sa admin mga ser
   Future<List<UserBusTicket>> getAllUserTickets() async {
     try {
       final snapshot = await FirebaseFirestore.instance.collectionGroup('tickets').get();

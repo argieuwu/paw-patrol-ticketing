@@ -1,5 +1,5 @@
-import 'package:capstone2/base/utils/app_json.dart';
 import 'package:capstone2/base/widgets/apps_double_text.dart';
+import 'package:capstone2/pages/Testing.dart';
 import 'package:capstone2/res/app_style.dart';
 import 'package:capstone2/screens/search/widgets/app_text_icon.dart';
 import 'package:capstone2/screens/search/widgets/app_tickets_tabs.dart';
@@ -48,14 +48,29 @@ class SearchScreen extends StatelessWidget {
           const SizedBox(
             height: 25,
           ),
-          const FindTickets(),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(
+                  builder: (context) => Testing()
+              ))
+              ;
+            },
+            child: const FindTickets(
+
+            ),
+          ),
           const SizedBox(
             height: 25,
           ),
           AppDoubleText(
             bigText: 'Upcoming Trips',
             smallText: 'View All',
-            func: () => Navigator.pushNamed(context, AppRoutes.allTickets),
+            func: () => Navigator.push(
+                context, MaterialPageRoute(
+                builder: (context) => Testing()
+            )
+            ),
           ),
           const SizedBox(
             height: 10,
