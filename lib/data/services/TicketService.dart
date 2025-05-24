@@ -9,10 +9,10 @@ class TicketService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
 
-  //Filters tickets matching the provided AdminBusTicket destination and departureTime.
-  // Returns a Set of taken seat numbers.
+  // Return a Set of taken seat numbers.
   Future<Set<int>> getTakenSeats(AdminBusTicket ticket) async {
-    final snapshot = await _firestore.collection('UserBusTickets').get();
+    //checking seat availability across all users for a specific bus trip
+    final snapshot = await _firestore.collectionGroup('tickets').get();
 
     return snapshot.docs
         .map((e) => UserBusTicket.fromJSON(e))
@@ -34,10 +34,6 @@ class TicketService {
       isPaid: false,
       seat: seat,
     );
-
-    await FirebaseFirestore.instance
-        .collection('UserBusTickets')
-        .add(newTicket.toJSON());
 
     await FirebaseFirestore.instance
         .collection('user')

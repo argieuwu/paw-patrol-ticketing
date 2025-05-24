@@ -9,12 +9,8 @@ class UserTicketController{
 
   Future<void> uploadUserTicket(UserBusTicket ticket) async {
     try {
-
-      // Upload to User-level nested collection
       await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
-
-      // Also upload to root-level collection for seat monitoring
-      await FirebaseFirestore.instance.collection('UserBusTickets').add(ticket.toJSON());
+      await FirebaseFirestore.instance.collection(_auth.currentUser!.uid).doc('tickets').set(ticket.toJSON());
     } catch (e) {
       print("Error uploading user ticket: $e");
     }
