@@ -65,7 +65,6 @@ class AdminBusTicket {
 
   factory AdminBusTicket.fromJSON(Map<String, dynamic> json) {
     final data = json['data'] ?? json;
-
     return AdminBusTicket(
       ticketId: data['ticket id']?.toString() ?? '',
       destination: (data['destination'] != null && data['destination'] is List)
