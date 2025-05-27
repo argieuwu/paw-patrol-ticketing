@@ -1,4 +1,7 @@
+import 'package:capstone2/data/api/ApiService.dart';
+import 'package:capstone2/data/controllers/CheckoutController.dart';
 import 'package:capstone2/data/data_sources/UserTicketDatabase.dart';
+import 'package:capstone2/data/model/Checkout.dart';
 import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,14 +10,10 @@ import 'package:flutter/cupertino.dart';
 class UserTicketController{
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> uploadUserTicket(UserBusTicket ticket) async {
+  Future<void> uploadUserTicket(UserBusTicket ticket, Checkout userpost) async {
     try {
-
-      // Upload to User-level nested collection
-      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON());
-
-      // Also upload to root-level collection for seat monitoring
-      await FirebaseFirestore.instance.collection('UserBusTickets').add(ticket.toJSON());
+     final holder = await CheckoutController().createCheckoutController(userpost.toJson());
+      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON(),holder.toJSON());
     } catch (e) {
       print("Error uploading user ticket: $e");
     }
