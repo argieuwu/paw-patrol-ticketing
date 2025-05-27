@@ -10,10 +10,10 @@ import 'package:flutter/cupertino.dart';
 class UserTicketController{
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> uploadUserTicket(UserBusTicket ticket, Checkout userpost) async {
+  Future<void> uploadUserTicket(UserBusTicket ticket, Checkout userpost, int seat) async {
     try {
      final holder = await CheckoutController().createCheckoutController(userpost.toJson());
-      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON(),holder.toJSON());
+      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON(),holder.toJSON(),seat);
     } catch (e) {
       print("Error uploading user ticket: $e");
     }
