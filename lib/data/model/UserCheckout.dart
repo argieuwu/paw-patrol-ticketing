@@ -53,16 +53,18 @@ class UserCheckout {
 
   Map<String, dynamic> toJSON() {
     return {
-      'id': id,
-      'type': type,
-      'email': email,
-      'checkoutURL': checkoutURL,
-      'client_key': client_key,
-      'description': description,
-      'items': items.map((e) => e.toJson()).toList(),
-      'status': status,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'apiData': {
+        'id': id,
+        'type': type,
+        'email': email,
+        'checkoutURL': checkoutURL,
+        'client_key': client_key,
+        'description': description,
+        'items': items.map((e) => e.toJson()).toList(),
+        'status': status,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+      }
     };
   }
 }

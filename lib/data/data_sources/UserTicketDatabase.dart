@@ -7,7 +7,7 @@ class UserTicketDatabase{
 
   Future<void> uploadUserTicketToDatabase(Map<String,dynamic> ticket, Map<String,dynamic> apiTicket,int seat) async{
     DocumentReference reference = db.collection('user').doc(auth.currentUser!.uid).collection('tickets').doc(); // Never ever jud ni ma empty ning Uid
-    ticket['ticket id'] = reference.id;
+    ticket['user ticket id'] = reference.id;
     ticket['seat'] = seat;
     ticket.addAll(apiTicket);
     await reference.set(ticket);
