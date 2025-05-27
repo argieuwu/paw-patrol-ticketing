@@ -37,7 +37,7 @@ class _TestingState extends State<Testing> {
     final amount = ticket.ticketPrice < 20 ? 20 : ticket.ticketPrice;
 
     final checkout = Checkout(
-      amount: ticket.ticketPrice * 100,
+      amount: ticket.ticketPrice * 1000,
       item_description: "Bus ticket from ${ticket.destination[0]} to ${ticket.destination[1]}",
       name: "Bus Ticket",
       quantity: 1,
