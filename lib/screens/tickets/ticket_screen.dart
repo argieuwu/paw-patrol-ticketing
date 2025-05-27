@@ -143,7 +143,7 @@ class TicketScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Ticket ID: ${userTicket.userTicketId}"),
-                Text("Paid: ${userTicket.isPaid ? "Yes" : "No"}"),
+                Text("Payment Status: ${userTicket.isPaid ? "Payment Successful" : "Payment Pending"}",),
                 Text("Seat No: ${userTicket.seat}"),
                 const Divider(),
                 Text("Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}"),
