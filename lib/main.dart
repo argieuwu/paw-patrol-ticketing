@@ -26,23 +26,25 @@ class MyApp extends StatelessWidget {
       routes: {
         '/auth': (context) => const Auth(), // Auth screen
         '/home': (context) => Testing(), // HomeScreen
-        '/allTickets': (context) {
-          // Fetch the ticket data dynamically (e.g., from Firestore or a provider)
-          final ticket = {
-            'departure': 'Tagum', // Example data
-            'destination': 'Davao', // Example data
-            'departure_time': '10:00 AM', // Example data
-            'duration': '2 hours', // Example data
-            'price': 200.0, // Example data
-          };
+        // '/allTickets': (context) => Testing(),
 
-          return TicketView(
-            ticket: ticket,
-            onTap: () {
-              print('Ticket tapped!');
-            },
-          );
-        },
+        // '/allTickets': (context) {
+        //   // Fetch the ticket data dynamically (e.g., from Firestore or a provider)
+        //   final ticket = {
+        //     'departure': 'Tagum', // Example data
+        //     'destination': 'Davao', // Example data
+        //     'departure_time': '10:00 AM', // Example data
+        //     'duration': '2 hours', // Example data
+        //     'price': 200.0, // Example data
+        //   };
+        //
+        //   return TicketView(
+        //     ticket: ticket,
+        //     onTap: () {
+        //       print('Ticket tapped!');
+        //     },
+        //   );
+        // },
       },
     );
   }

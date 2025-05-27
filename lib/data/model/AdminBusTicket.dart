@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//bus ticket managed by an admin
 class AdminBusTicket {
-  final List<String> destination;
-  final DateTime departureTime;
-  final int totalSeats;
-  final int ticketPrice;
-  final String? ticketId;
-  final bool isAircon;
-  final bool isCompleted; // Add this field
+  final List<String> destination;   //start and end points of the trip
+  final DateTime departureTime;  //a DateTime for when the bus departs or go.
+  final int totalSeats;    // total number of seats on the bus.
+  final int ticketPrice;   //tagpila ang ticket.
+  final String? ticketId;   //unique Firestore document ID
+  final bool isAircon;   //kung with aircon or wlay aircon ang bus
+  final bool isCompleted;   //status sa bus kung humanag byahe or wla
 
 
   AdminBusTicket(
@@ -17,7 +18,7 @@ class AdminBusTicket {
       required this.totalSeats,
       required this.ticketPrice,
       required this.isAircon,
-      this.isCompleted = false, // Constructor should take this as well
+      this.isCompleted = false,
       });
 
   AdminBusTicket.noID(
@@ -30,10 +31,13 @@ class AdminBusTicket {
         this.isCompleted = false,
       });
 
+  //gina converts  niya ang ticket object
+  // 'destination, departureTime, totalSeats, ticketPrice, isAircon, isCompleted'
+  // to JSON map pasa ma butang sa Firestore storage. Sulod sa 'data'.
   Map<String, dynamic> toJson() {
     return {
       "data": {
-        "ticket id": ticketId, //for update daw
+        "ticket id": ticketId,
         "destination": destination,
         "departure time": departureTime,
         "total seats": totalSeats,
@@ -53,7 +57,7 @@ class AdminBusTicket {
         "total seats": totalSeats,
         "ticket price": ticketPrice,
         "aircon": isAircon,
-        "isCompleted": isCompleted, // Save the completed status
+        "isCompleted": isCompleted,
 
       }
     };
@@ -75,6 +79,5 @@ class AdminBusTicket {
       isCompleted: data['isCompleted'] ?? false,
     );
   }
-
 
 }

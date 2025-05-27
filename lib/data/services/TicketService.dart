@@ -3,13 +3,16 @@ import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
+// handles ticket booking and seat management.
 class TicketService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+
+  // Return a Set of taken seat numbers.
   Future<Set<int>> getTakenSeats(AdminBusTicket ticket) async {
-    final snapshot = await _firestore.collection('UserBusTickets').get();
+    //checking seat availability across all users for a specific bus trip
+    final snapshot = await _firestore.collectionGroup('tickets').get();
 
     return snapshot.docs
         .map((e) => UserBusTicket.fromJSON(e))
@@ -21,6 +24,8 @@ class TicketService {
         .toSet();
   }
 
+  //Creates a new UserBusTicket.noID with the user email, the provided ticket,
+  // isPaid: false, and the selected seat.
   Future<void> bookTicket(AdminBusTicket ticket, int seat) async {
     final userEmail = _auth.currentUser!.email.toString();
     final newTicket = UserBusTicket.noID(
@@ -29,10 +34,6 @@ class TicketService {
       isPaid: false,
       seat: seat,
     );
-
-    await FirebaseFirestore.instance
-        .collection('UserBusTickets')
-        .add(newTicket.toJSON());
 
     await FirebaseFirestore.instance
         .collection('user')
