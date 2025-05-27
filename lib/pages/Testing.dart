@@ -5,6 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:capstone2/data/controllers/AdminTicket_data_controller.dart';
 import 'package:capstone2/data/controllers/UserTicket_data_controller.dart';
 import 'package:capstone2/data/model/AdminBusTicket.dart';
+import 'package:capstone2/data/model/Checkout.dart';
+import 'package:capstone2/data/controllers/CheckoutController.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Testing extends StatefulWidget {
   const Testing({super.key});
@@ -17,6 +20,8 @@ class _TestingState extends State<Testing> {
   late Stream<QuerySnapshot> adminTickets;
   late Stream<QuerySnapshot> userTickets;
   final TicketService _ticketService = TicketService();
+  final UserTicketController _userTicketController = UserTicketController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -25,87 +30,145 @@ class _TestingState extends State<Testing> {
     super.initState();
   }
 
-  Future<int?> showSeatPickerDialog(BuildContext context, AdminBusTicket ticket) async {
-    final takenSeats = await _ticketService.getTakenSeats(ticket);
+  Future<void> _showPaymentDialog(BuildContext context, AdminBusTicket ticket, int seat) async {
 
-    return showDialog<int>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Choose a Seat'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: ticket.totalSeats,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-              ),
-              itemBuilder: (context, index) {
-                int seatNumber = index + 1;
-                bool isTaken = takenSeats.contains(seatNumber);
+    // dapat 20php pataas ang price na ibutang bai kay dili mo dawat and  paymongo
+    //og below baynte
+    final amount = ticket.ticketPrice < 20 ? 20 : ticket.ticketPrice;
 
-                return ElevatedButton(
-                  onPressed: isTaken ? null : () => Navigator.pop(context, seatNumber),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isTaken ? Colors.grey : Colors.blue,
-                  ),
-                  child: Text(
-                    seatNumber.toString(),
-                    style: TextStyle(
-                      color: isTaken ? Colors.black54 : Colors.white,
-                    ),
-                  ),
+    final checkout = Checkout(
+      amount: ticket.ticketPrice * 100,
+      item_description: "Bus ticket from ${ticket.destination[0]} to ${ticket.destination[1]}",
+      name: "Bus Ticket",
+      quantity: 1,
+      description: "Payment for bus ticket - Seat #$seat",
+    );
+
+    try {
+      final userCheckout = await CheckoutController().createCheckoutController(checkout.toJson());
+
+      if (!mounted) return;
+
+      //  payment dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Payment Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Original Price: ₱${ticket.ticketPrice}'),
+              if (ticket.ticketPrice < 20) ...[
+              ],
+              Text('Seat: #$seat'),
+              Text('Route: ${ticket.destination[0]} → ${ticket.destination[1]}'),
+              const SizedBox(height: 16),
+              const Text('Payment URL:'),
+              SelectableText(userCheckout.checkoutURL),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Create user ticket
+                final userTicket = UserBusTicket.noID(
+                  email: _auth.currentUser!.email ?? '',
+                  data: ticket,
+                  isPaid: false,
+                  seat: seat,
+                );
+
+                // Upload ticket to database
+                await _userTicketController.uploadUserTicket(userTicket, checkout, seat);
+
+                if (!mounted) return;
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ticket booked successfully! Please complete the payment.')),
                 );
               },
+              child: const Text('Confirm Booking'),
             ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating payment: $e')),
+      );
+    }
+  }
+
+  Future<int?> showSeatPickerDialog(BuildContext context, AdminBusTicket ticket) async {
+    final takenSeats = await _ticketService.getTakenSeats(ticket);
+    int? selectedSeat;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select a Seat'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              childAspectRatio: 1,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: ticket.totalSeats,
+            itemBuilder: (context, index) {
+              final seatNumber = index + 1;
+              final isTaken = takenSeats.contains(seatNumber);
+
+              return ElevatedButton(
+                onPressed: isTaken ? null : () {
+                  selectedSeat = seatNumber;
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isTaken ? Colors.grey : Colors.blue,
+                ),
+                child: Text('$seatNumber'),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
+
+    return selectedSeat;
   }
 
   Widget _buildRouteList(List<AdminBusTicket> tickets) {
-    if (tickets.isEmpty) {
-      return const Center(child: Text("No upcoming routes available"));
-    }
-
     return ListView.builder(
-      scrollDirection: Axis.horizontal,
       itemCount: tickets.length,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (context, index) {
         final ticket = tickets[index];
-
         return Card(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Ticket #${index + 1}'),
-              Text('From: ${ticket.destination[0]}'),
-              Text('To: ${ticket.destination[1]}'),
-              Text('Departure: ${ticket.departureTime}'),
-              Text('Seats: ${ticket.totalSeats}'),
-              Text('Price: ₱${ticket.ticketPrice}'),
-              Text('Aircon: ${ticket.isAircon}'),
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: () async {
-                  final selectedSeat = await showSeatPickerDialog(context, ticket);
-                  if (selectedSeat != null) {
-                    await _ticketService.bookTicket(ticket, selectedSeat);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Seat #$selectedSeat booked successfully!')
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Book Ticket'),
-              ),
-            ],
+          child: ListTile(
+            title: Text('${ticket.destination[0]} → ${ticket.destination[1]}'),
+            subtitle: Text(
+              'Departure: ${ticket.departureTime.toString()}\n'
+                  'Price: ₱${ticket.ticketPrice}\n'
+                  'Aircon: ${ticket.isAircon ? "Yes" : "No"}',
+            ),
+            trailing: ElevatedButton(
+              onPressed: () async {
+                final selectedSeat = await showSeatPickerDialog(context, ticket);
+                if (selectedSeat != null) {
+                  await _showPaymentDialog(context, ticket, selectedSeat);
+                }
+              },
+              child: const Text('Book Ticket'),
+            ),
           ),
         );
       },
