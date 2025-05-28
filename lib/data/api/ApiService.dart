@@ -44,4 +44,20 @@ class Apiservice {
     }
   }
 
+  Future<String> expireCheckout(String id) async{
+    final response = await http.post(
+      Uri.parse('https://api.paymongo.com/v1/checkout_sessions/$id/expire'),
+      headers: <String, String>{
+        HttpHeaders.authorizationHeader: basicAuth,
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if(response.statusCode == 200){
+      return "$id : has been Expired";
+    }
+    else{
+      throw Exception('API error: ${response.body}');
+    }
+  }
 }
