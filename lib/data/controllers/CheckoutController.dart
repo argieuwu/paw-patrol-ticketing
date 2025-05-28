@@ -20,4 +20,12 @@ class CheckoutController{
       throw("Controller error getCheckout: $e");
     }
   }
+
+  Future<void> expireIdController(String id) async{
+    try{
+      await Apiservice().expireCheckout(id);
+    }catch(e){
+      throw("Controller Error expireIdController : $e");
+    }
+  }
 }
