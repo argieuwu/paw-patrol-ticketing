@@ -8,6 +8,7 @@ import 'package:capstone2/data/model/AdminBusTicket.dart';
 import 'package:capstone2/data/model/Checkout.dart';
 import 'package:capstone2/data/controllers/CheckoutController.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Testing extends StatefulWidget {
   const Testing({super.key});
@@ -30,26 +31,25 @@ class _TestingState extends State<Testing> {
     super.initState();
   }
 
-  Future<void> _showPaymentDialog(BuildContext context, AdminBusTicket ticket, int seat) async {
-
-    // dapat 20php pataas ang price na ibutang bai kay dili mo dawat and  paymongo
-    //og below baynte
+  Future<void> _showPaymentDialog(
+      BuildContext context, AdminBusTicket ticket, int seat) async {
     final amount = ticket.ticketPrice < 20 ? 20 : ticket.ticketPrice;
 
     final checkout = Checkout(
       amount: ticket.ticketPrice * 1000,
-      item_description: "Bus ticket from ${ticket.destination[0]} to ${ticket.destination[1]}",
+      item_description:
+          "Bus ticket from ${ticket.destination[0]} to ${ticket.destination[1]}",
       name: "Bus Ticket",
       quantity: 1,
       description: "Payment for bus ticket - Seat #$seat",
     );
 
     try {
-      final userCheckout = await CheckoutController().createCheckoutController(checkout.toJson());
+      final userCheckout = await CheckoutController()
+          .createCheckoutController(checkout.toJson());
 
       if (!mounted) return;
 
-      //  payment dialog
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -59,13 +59,9 @@ class _TestingState extends State<Testing> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Original Price: ₱${ticket.ticketPrice}'),
-              if (ticket.ticketPrice < 20) ...[
-              ],
               Text('Seat: #$seat'),
-              Text('Route: ${ticket.destination[0]} → ${ticket.destination[1]}'),
-              const SizedBox(height: 16),
-              const Text('Payment URL:'),
-              SelectableText(userCheckout.checkoutURL),
+              Text(
+                  'Route: ${ticket.destination[0]} → ${ticket.destination[1]}'),
             ],
           ),
           actions: [
@@ -73,9 +69,8 @@ class _TestingState extends State<Testing> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Close'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
-                // Create user ticket
                 final userTicket = UserBusTicket.noID(
                   email: _auth.currentUser!.email ?? '',
                   data: ticket,
@@ -83,16 +78,33 @@ class _TestingState extends State<Testing> {
                   seat: seat,
                 );
 
-                // Upload ticket to database
-                await _userTicketController.uploadUserTicket(userTicket, checkout, seat);
+                await _userTicketController.uploadUserTicket(
+                    userTicket, checkout, seat);
 
                 if (!mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ticket booked successfully! Please complete the payment.')),
+                  const SnackBar(
+                      content: Text(
+                          'Ticket booked successfully! Please complete the payment.')),
                 );
               },
               child: const Text('Confirm Booking'),
+            ),
+            OutlinedButton(
+              onPressed: () async {
+                final url = Uri.parse(userCheckout.checkoutURL);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Something went wrong. Please try again later.')),
+                  );
+                }
+              },
+              child: const Text('Proceed to Payment'),
             ),
           ],
         ),
@@ -105,9 +117,14 @@ class _TestingState extends State<Testing> {
     }
   }
 
-  Future<int?> showSeatPickerDialog(BuildContext context, AdminBusTicket ticket) async {
+  Future<int?> showSeatPickerDialog(
+      BuildContext context, AdminBusTicket ticket) async {
     final takenSeats = await _ticketService.getTakenSeats(ticket);
     int? selectedSeat;
+
+    const seatsPerRow = 4;
+    const totalSeats = 20;
+    final totalRows = (totalSeats / seatsPerRow).ceil();
 
     await showDialog(
       context: context,
@@ -117,26 +134,56 @@ class _TestingState extends State<Testing> {
           width: double.maxFinite,
           child: GridView.builder(
             shrinkWrap: true,
+            itemCount: totalRows * 5,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 1,
+              crossAxisCount: 5,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: ticket.totalSeats,
             itemBuilder: (context, index) {
-              final seatNumber = index + 1;
-              final isTaken = takenSeats.contains(seatNumber);
+              final col = index % 5;
 
-              return ElevatedButton(
-                onPressed: isTaken ? null : () {
-                  selectedSeat = seatNumber;
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isTaken ? Colors.grey : Colors.blue,
+              if (col == 2) return const SizedBox.shrink();
+
+              final row = index ~/ 5;
+              final seatInRow = col > 2 ? col - 1 : col;
+              final seatNumber = row * seatsPerRow + seatInRow + 1;
+
+              if (seatNumber > totalSeats) return const SizedBox.shrink();
+
+              final isTaken = takenSeats.contains(seatNumber);
+              final isSelected = selectedSeat == seatNumber;
+
+              Color seatColor;
+              if (isTaken) {
+                seatColor = Colors.indigo[900]!;
+              } else if (isSelected) {
+                seatColor = Colors.pinkAccent;
+              } else {
+                seatColor = Colors.grey[300]!;
+              }
+
+              return GestureDetector(
+                onTap: isTaken
+                    ? null
+                    : () {
+                        selectedSeat = seatNumber;
+                        Navigator.pop(context, selectedSeat);
+                      },
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: seatColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$seatNumber',
+                    style: TextStyle(
+                      color: isTaken ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                child: Text('$seatNumber'),
               );
             },
           ),
@@ -153,21 +200,98 @@ class _TestingState extends State<Testing> {
       itemBuilder: (context, index) {
         final ticket = tickets[index];
         return Card(
-          child: ListTile(
-            title: Text('${ticket.destination[0]} → ${ticket.destination[1]}'),
-            subtitle: Text(
-              'Departure: ${ticket.departureTime.toString()}\n'
-                  'Price: ₱${ticket.ticketPrice}\n'
-                  'Aircon: ${ticket.isAircon ? "Yes" : "No"}',
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${ticket.destination[0]} → ${ticket.destination[1]}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.access_time, size: 18),
+                    const SizedBox(width: 4),
+                    Text('Departure: ${ticket.departureTime}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.airline_seat_recline_extra, size: 18),
+                    const SizedBox(width: 4),
+                    Text('Aircon: ${ticket.isAircon ? "Yes" : "No"}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.attach_money, size: 18),
+                    const SizedBox(width: 4),
+                    Text('Price: ₱${ticket.ticketPrice}'),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      final selectedSeat =
+                          await showSeatPickerDialog(context, ticket);
+                      if (selectedSeat != null) {
+                        await _showPaymentDialog(context, ticket, selectedSeat);
+                      }
+                    },
+                    child: const Text('Book Ticket'),
+                  ),
+                ),
+              ],
             ),
-            trailing: ElevatedButton(
-              onPressed: () async {
-                final selectedSeat = await showSeatPickerDialog(context, ticket);
-                if (selectedSeat != null) {
-                  await _showPaymentDialog(context, ticket, selectedSeat);
-                }
-              },
-              child: const Text('Book Ticket'),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUserTicketList(List<UserBusTicket> tickets) {
+    return ListView.builder(
+      itemCount: tickets.length,
+      itemBuilder: (context, index) {
+        final userTicket = tickets[index];
+        return Card(
+          elevation: 3,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ticket #${userTicket.userTicketId}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text('From: ${userTicket.data.destination[0]}'),
+                Text('To: ${userTicket.data.destination[1]}'),
+                Text('Departure: ${userTicket.data.departureTime}'),
+                Text('Seat: ${userTicket.seat}'),
+                Text(
+                  'Status: ${userTicket.isPaid ? 'Paid' : 'Unpaid'}',
+                  style: TextStyle(
+                      color: userTicket.isPaid ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.w500),
+                ),
+              ],
             ),
           ),
         );
@@ -179,17 +303,22 @@ class _TestingState extends State<Testing> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Scan & Go'),
+        centerTitle: true,
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
-          Text('Available Bus Trip',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Available Bus Trips',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
           Expanded(
             child: StreamBuilder(
               stream: adminTickets,
@@ -201,22 +330,27 @@ class _TestingState extends State<Testing> {
                 }
 
                 final allTickets = snapshot.data!.docs
-                    .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
+                    .map((e) => AdminBusTicket.fromJSON(
+                        e.data() as Map<String, dynamic>))
                     .toList();
 
                 final upcomingTickets = allTickets.where((ticket) {
-                  return ticket.departureTime.isAfter(DateTime.now()) && !ticket.isCompleted;
+                  return ticket.departureTime.isAfter(DateTime.now()) &&
+                      !ticket.isCompleted;
                 }).toList();
 
                 return _buildRouteList(upcomingTickets);
               },
             ),
           ),
-          const SizedBox(height: 40),
-
-          Text('User Booked Tickets'),
-          const SizedBox(height: 20),
-
+          const Divider(thickness: 1),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Your Booked Tickets',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
           Expanded(
             child: StreamBuilder(
               stream: userTickets,
@@ -231,28 +365,7 @@ class _TestingState extends State<Testing> {
                     .map((e) => UserBusTicket.fromJSON(e))
                     .toList();
 
-                return ListView.builder(
-                  itemCount: userTicketsList.length,
-                  itemBuilder: (context, index) {
-                    final userTicket = userTicketsList[index];
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Ticket ID: ${userTicket.userTicketId}'),
-                            Text('From: ${userTicket.data.destination[0]}'),
-                            Text('To: ${userTicket.data.destination[1]}'),
-                            Text('Departure: ${userTicket.data.departureTime}'),
-                            Text('Seat: ${userTicket.seat}'),
-                            Text('Status: ${userTicket.isPaid ? 'Paid' : 'Unpaid'}'),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return _buildUserTicketList(userTicketsList);
               },
             ),
           ),

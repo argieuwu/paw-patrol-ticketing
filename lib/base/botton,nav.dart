@@ -1,8 +1,6 @@
 import 'package:capstone2/pages/Testing.dart';
-import 'package:capstone2/screens/home/home_screen.dart';
-import 'package:capstone2/screens/person/profile_screen.dart';
-import 'package:capstone2/screens/search/search_screen.dart';
 import 'package:capstone2/screens/tickets/ticket_screen.dart';
+import 'package:capstone2/screens/person/profile_screen.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +14,6 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   final appScreens = [
     Testing(),
-    const SearchScreen(),
     const TicketScreen(),
     const PersonScreen(),
   ];
@@ -36,7 +33,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         child: appScreens[_selectedIndex],
       ),
       bottomNavigationBar: BottomAppBar(
-        height: 60, // Add fixed height
+        height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
@@ -54,8 +51,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
             IconButton(
               icon: Icon(
                 _selectedIndex == 1
-                    ? FluentSystemIcons.ic_fluent_search_filled
-                    : FluentSystemIcons.ic_fluent_search_regular,
+                    ? FluentSystemIcons.ic_fluent_ticket_filled
+                    : FluentSystemIcons.ic_fluent_ticket_regular,
               ),
               onPressed: () => _onItemTapped(1),
               color: _selectedIndex == 1
@@ -65,22 +62,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
             IconButton(
               icon: Icon(
                 _selectedIndex == 2
-                    ? FluentSystemIcons.ic_fluent_ticket_filled
-                    : FluentSystemIcons.ic_fluent_ticket_regular,
-              ),
-              onPressed: () => _onItemTapped(2),
-              color: _selectedIndex == 2
-                  ? Colors.blueGrey
-                  : const Color(0xFF757575),
-            ),
-            IconButton(
-              icon: Icon(
-                _selectedIndex == 3
                     ? FluentSystemIcons.ic_fluent_person_filled
                     : FluentSystemIcons.ic_fluent_person_regular,
               ),
-              onPressed: () => _onItemTapped(3),
-              color: _selectedIndex == 3
+              onPressed: () => _onItemTapped(2),
+              color: _selectedIndex == 2
                   ? Colors.blueGrey
                   : const Color(0xFF757575),
             ),

@@ -12,7 +12,8 @@ class ManageBusRoutesScreen extends StatefulWidget {
   State<ManageBusRoutesScreen> createState() => _ManageBusRoutesScreenState();
 }
 
-class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with SingleTickerProviderStateMixin {
+class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen>
+    with SingleTickerProviderStateMixin {
   late Stream<QuerySnapshot> adminTickets;
   List<UserBusTicket> allUserTickets = [];
   final AdminTicketController _adminController = AdminTicketController();
@@ -61,10 +62,14 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
   }
 
   void _showEditDialog(AdminBusTicket ticket) {
-    TextEditingController originController = TextEditingController(text: ticket.destination[0]);
-    TextEditingController destinationController = TextEditingController(text: ticket.destination[1]);
-    TextEditingController seatsController = TextEditingController(text: ticket.totalSeats.toString());
-    TextEditingController priceController = TextEditingController(text: ticket.ticketPrice.toString());
+    TextEditingController originController =
+        TextEditingController(text: ticket.destination[0]);
+    TextEditingController destinationController =
+        TextEditingController(text: ticket.destination[1]);
+    TextEditingController seatsController =
+        TextEditingController(text: ticket.totalSeats.toString());
+    TextEditingController priceController =
+        TextEditingController(text: ticket.ticketPrice.toString());
 
     showDialog(
       context: context,
@@ -78,10 +83,23 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
             content: SingleChildScrollView(
               child: Column(
                 children: [
-                  TextField(controller: originController, decoration: const InputDecoration(labelText: 'Origin')),
-                  TextField(controller: destinationController, decoration: const InputDecoration(labelText: 'Destination')),
-                  TextField(controller: seatsController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Total Seats')),
-                  TextField(controller: priceController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Ticket Price')),
+                  TextField(
+                      controller: originController,
+                      decoration: const InputDecoration(labelText: 'Origin')),
+                  TextField(
+                      controller: destinationController,
+                      decoration:
+                          const InputDecoration(labelText: 'Destination')),
+                  TextField(
+                      controller: seatsController,
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          const InputDecoration(labelText: 'Total Seats')),
+                  TextField(
+                      controller: priceController,
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          const InputDecoration(labelText: 'Ticket Price')),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () async {
@@ -109,24 +127,31 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                         }
                       }
                     },
-                    child: Text('Select Departure: ${selectedDateTime.toString().substring(0, 16)}'),
+                    child: Text(
+                        'Select Departure: ${selectedDateTime.toString().substring(0, 16)}'),
                   ),
                   CheckboxListTile(
                     title: const Text('Air Conditioned'),
                     value: isAircon,
-                    onChanged: (value) => setDialogState(() => isAircon = value ?? false),
+                    onChanged: (value) =>
+                        setDialogState(() => isAircon = value ?? false),
                   ),
                 ],
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel')),
               TextButton(
                 onPressed: () async {
                   try {
                     AdminBusTicket updatedTicket = AdminBusTicket(
                       ticketId: ticket.ticketId,
-                      destination: [originController.text, destinationController.text],
+                      destination: [
+                        originController.text,
+                        destinationController.text
+                      ],
                       departureTime: selectedDateTime,
                       totalSeats: int.parse(seatsController.text),
                       ticketPrice: int.parse(priceController.text),
@@ -136,11 +161,13 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                     await _adminController.updatedAdminTicket(updatedTicket);
                     if (mounted) {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Route updated successfully')));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Route updated successfully')));
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text('Error: $e')));
                     }
                   }
                 },
@@ -153,7 +180,8 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
     );
   }
 
-  List<AdminBusTicket> _filterTickets(List<AdminBusTicket> tickets, String category) {
+  List<AdminBusTicket> _filterTickets(
+      List<AdminBusTicket> tickets, String category) {
     final now = DateTime.now();
     return tickets.where((ticket) {
       if (category == 'upcoming') {
@@ -177,13 +205,15 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
         final route = tickets[index];
         final bookings = allUserTickets
             .where((ticket) =>
-        ticket.data.destination[0] == route.destination[0] &&
-            ticket.data.destination[1] == route.destination[1] &&
-            ticket.data.departureTime == route.departureTime)
+                ticket.data.destination[0] == route.destination[0] &&
+                ticket.data.destination[1] == route.destination[1] &&
+                ticket.data.departureTime == route.departureTime)
             .toList();
 
         final isCompleted = route.isCompleted ||
-            route.departureTime.add(const Duration(hours: 12)).isBefore(DateTime.now());
+            route.departureTime
+                .add(const Duration(hours: 12))
+                .isBefore(DateTime.now());
 
         return Card(
           margin: const EdgeInsets.all(12),
@@ -194,11 +224,14 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
               children: [
                 Text(
                   'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text('Departure: ${route.departureTime.toString().substring(0, 16)}'),
-                Text('Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
+                Text(
+                    'Departure: ${route.departureTime.toString().substring(0, 16)}'),
+                Text(
+                    'Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
                 Text('Aircon: ${route.isAircon ? 'Yes' : 'No'}'),
                 const SizedBox(height: 10),
                 Row(
@@ -207,7 +240,8 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => _showEditDialog(route),
-                          child: const Text('Edit', style: TextStyle(color: Colors.black)),
+                          child: const Text('Edit',
+                              style: TextStyle(color: Colors.black)),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -223,8 +257,12 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                                   ? 'Are you sure you want to delete this completed route? This will also delete all associated bookings.'
                                   : 'Are you sure you want to delete this route?'),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                                TextButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: const Text('Cancel')),
+                                TextButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: const Text('Delete')),
                               ],
                             ),
                           );
@@ -232,11 +270,15 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                             await _adminController.deleteAdminTicket(route);
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Route deleted successfully')));
+                                  const SnackBar(
+                                      content:
+                                          Text('Route deleted successfully')));
                             }
                           }
                         },
-                        child: Text('Delete', style: TextStyle(color: isCompleted ? Colors.red : Colors.red)),
+                        child: Text('Delete',
+                            style: TextStyle(
+                                color: isCompleted ? Colors.red : Colors.red)),
                       ),
                     ),
                   ],
@@ -249,11 +291,13 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ViewBookingsPage(route: route, bookings: bookings),
+                          builder: (_) => ViewBookingsPage(
+                              route: route, bookings: bookings),
                         ),
                       );
                     },
-                    child: const Text('View Bookings', style: TextStyle(color: Colors.black)),
+                    child: const Text('View Bookings',
+                        style: TextStyle(color: Colors.black)),
                   ),
                 ),
               ],
@@ -291,7 +335,8 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
           }
 
           final allTickets = snapshot.data!.docs
-              .map((e) => AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
+              .map((e) =>
+                  AdminBusTicket.fromJSON(e.data() as Map<String, dynamic>))
               .toList();
 
           return TabBarView(
