@@ -5,8 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class Apiservice {
-  final String secretKey =
-      'sk_test_899mPkGNAeddzutaZibPTV4U'; // Yes aware ko haha
+  final String secretKey = ''; // Yes aware ko haha
   late String basicAuth;
   Apiservice() {
     basicAuth = 'Basic ${base64Encode(utf8.encode('$secretKey:'))}';
