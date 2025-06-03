@@ -199,13 +199,13 @@ class _TestingState extends State<Testing> {
       itemCount: tickets.length,
       itemBuilder: (context, index) {
         final ticket = tickets[index];
+        final isPastDeparture = ticket.departureTime.isBefore(DateTime.now());
         return Card(
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -215,44 +215,44 @@ class _TestingState extends State<Testing> {
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.access_time, size: 18),
-                    const SizedBox(width: 4),
-                    Text('Departure: ${ticket.departureTime}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.airline_seat_recline_extra, size: 18),
-                    const SizedBox(width: 4),
-                    Text('Aircon: ${ticket.isAircon ? "Yes" : "No"}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.attach_money, size: 18),
-                    const SizedBox(width: 4),
-                    Text('Price: ₱${ticket.ticketPrice}'),
-                  ],
-                ),
+                Text('Departure: ${ticket.departureTime}'),
                 const SizedBox(height: 12),
+
+                // Conditional button or label
                 Align(
                   alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: () async {
-                      final selectedSeat =
-                          await showSeatPickerDialog(context, ticket);
-                      if (selectedSeat != null) {
-                        await _showPaymentDialog(context, ticket, selectedSeat);
-                      }
-                    },
-                    child: const Text('Book Ticket'),
-                  ),
+                  child: isPastDeparture
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Ready for Departure',
+                            style: TextStyle(
+                              color: Colors.deepOrange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () async {
+                            final selectedSeat =
+                                await showSeatPickerDialog(context, ticket);
+                            if (selectedSeat != null) {
+                              await _showPaymentDialog(
+                                  context, ticket, selectedSeat);
+                            }
+                          },
+                          child: const Text('Book Ticket'),
+                        ),
                 ),
               ],
             ),
