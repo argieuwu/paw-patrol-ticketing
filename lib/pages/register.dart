@@ -1,7 +1,7 @@
-import 'package:capstone2/components/my_button.dart';
 import 'package:capstone2/components/my_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Register extends StatefulWidget {
   final Function()? onTap;
@@ -12,50 +12,31 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  // Text editing controller
   final gmailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // Sign user up method
   void signUserUp() async {
-    // Show loading circle
     showDialog(
       context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
       if (passwordController.text == confirmPasswordController.text) {
-        // Create new user
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: gmailController.text,
           password: passwordController.text,
         );
-
-        // Sign out the user immediately after registration
         await FirebaseAuth.instance.signOut();
-
-        // Pop the loading circle
         Navigator.pop(context);
-
-        // Navigate back to login page
         widget.onTap?.call();
       } else {
-        // Pop the loading circle
         Navigator.pop(context);
-        // Show error message if passwords don't match
         showErrorMessage("Passwords don't match!");
       }
     } on FirebaseAuthException catch (e) {
-      // Pop the loading circle
       Navigator.pop(context);
-
-      // Handle errors
       if (e.code == 'email-already-in-use') {
         showErrorMessage('Email is already in use.');
       } else {
@@ -64,127 +45,144 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  // Error message dialog
   void showErrorMessage(String message) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              message,
-            ),
+      builder: (context) => AlertDialog(
+        title: Center(
+          child: Text(
+            message,
+            style: GoogleFonts.poppins(),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get screen size
     final screenSize = MediaQuery.of(context).size;
     final padding = screenSize.width * 0.05;
 
     return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE0EAFC), Color(0xFFCFDEF3)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: screenSize.height * 0.02),
                   // Logo
-                  Padding(
-                    padding: EdgeInsets.only(top: screenSize.height * 0.2),
-                    child: Image.asset(
-                      'lib/images/Davo.png',
-                      width: screenSize.width * 0.5,
-                      fit: BoxFit.contain,
+                  Image.asset(
+                    'lib/images/Davo.png',
+                    width: screenSize.width * 0.5,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 30),
+                  // Tagline
+                  Text(
+                    'Your Partner in Safe and Convenient Travel.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.grey[700],
+                      fontSize: 18,
                     ),
                   ),
-                  SizedBox(height: screenSize.height * 0.05),
-                  // Tagline
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: Text(
-                      'Your Partner in Safe and Convenient Travel.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: screenSize.width * 0.05,
+                  const SizedBox(height: 30),
+                  // Card Container
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: [
+                          // Gmail
+                          MyTextfield(
+                            controller: gmailController,
+                            hintText: 'Email',
+                            obscureText: false,
+                          ),
+                          const SizedBox(height: 20),
+                          // Password
+                          MyTextfield(
+                            controller: passwordController,
+                            hintText: 'Password',
+                            obscureText: true,
+                          ),
+                          const SizedBox(height: 20),
+                          // Confirm Password
+                          MyTextfield(
+                            controller: confirmPasswordController,
+                            hintText: 'Confirm Password',
+                            obscureText: true,
+                          ),
+                          const SizedBox(height: 30),
+                          // Sign Up button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: signUserUp,
+                              icon: const Icon(Icons.person_add),
+                              label: Text(
+                                'Sign Up',
+                                style: GoogleFonts.poppins(fontSize: 16),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: screenSize.height * 0.03),
-                  // Gmail text field
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: MyTextfield(
-                      controller: gmailController,
-                      hintText: 'Gmail',
-                      obscureText: false,
-                    ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.02),
-                  // Password text field
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: MyTextfield(
-                      controller: passwordController,
-                      hintText: 'Password',
-                      obscureText: true,
-                    ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.02),
-                  // Confirm Password text field
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: MyTextfield(
-                      controller: confirmPasswordController,
-                      hintText: 'Confirm Password',
-                      obscureText: true,
-                    ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.04),
-                  // Sign up button
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: MyButton(
-                      text: "Sign Up",
-                      onTap: signUserUp,
-                    ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.05),
+                  const SizedBox(height: 20),
                   // Already have an account? Login now
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Already have an account?',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.grey[700],
-                          fontSize: screenSize.width * 0.04,
+                          fontSize: 14,
                         ),
                       ),
-                      SizedBox(width: screenSize.width * 0.01),
+                      const SizedBox(width: 5),
                       GestureDetector(
                         onTap: widget.onTap,
                         child: Text(
                           'Login Now',
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
-                            fontSize: screenSize.width * 0.045,
+                            fontSize: 14,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ],
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),

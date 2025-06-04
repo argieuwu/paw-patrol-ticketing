@@ -10,7 +10,7 @@ class AdminHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F6FF), // Light blue-gray background
+      backgroundColor: const Color(0xFFF2F6FF),
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         backgroundColor: const Color(0xFF1565C0), // Deep blue
