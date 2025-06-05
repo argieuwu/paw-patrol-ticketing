@@ -132,6 +132,7 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                       ticketPrice: int.parse(priceController.text),
                       isAircon: isAircon,
                       isCompleted: ticket.isCompleted,
+                      plateNumber: ticket.plateNumber,
                     );
                     await _adminController.updatedAdminTicket(updatedTicket);
                     if (mounted) {
@@ -188,26 +189,54 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
         return Card(
           margin: const EdgeInsets.all(12),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Route #${index + 1} | ${route.destination[0]} → ${route.destination[1]}',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isCompleted ? Colors.grey : Colors.green,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        isCompleted ? 'Completed' : 'Active',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 8),
+                Text('Bus Plate Number: ${route.plateNumber}',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 8),
                 Text('Departure: ${route.departureTime.toString().substring(0, 16)}'),
-                Text('Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
-                Text('Aircon: ${route.isAircon ? 'Yes' : 'No'}'),
-                const SizedBox(height: 10),
+                Text('Total Seats: ${route.totalSeats} | Price: ₱${route.ticketPrice}'),
+                Text('Air Conditioned: ${route.isAircon ? 'Yes' : 'No'}'),
+                Text('Bookings: ${bookings.length}/${route.totalSeats}'),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     if (!isCompleted) ...[
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => _showEditDialog(route),
-                          child: const Text('Edit', style: TextStyle(color: Colors.black)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Edit'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -223,8 +252,14 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                                   ? 'Are you sure you want to delete this completed route? This will also delete all associated bookings.'
                                   : 'Are you sure you want to delete this route?'),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('Delete'),
+                                ),
                               ],
                             ),
                           );
@@ -236,7 +271,11 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                             }
                           }
                         },
-                        child: Text('Delete', style: TextStyle(color: isCompleted ? Colors.red : Colors.red)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Delete'),
                       ),
                     ),
                   ],
@@ -253,7 +292,11 @@ class _ManageBusRoutesScreenState extends State<ManageBusRoutesScreen> with Sing
                         ),
                       );
                     },
-                    child: const Text('View Bookings', style: TextStyle(color: Colors.black)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('View Bookings'),
                   ),
                 ),
               ],
