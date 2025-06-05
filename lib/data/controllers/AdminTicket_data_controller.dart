@@ -44,7 +44,19 @@ class AdminTicketController {
     }
   }
 
-  // New method to update isCompleted status for all tickets based on departure time
+  //status sa bus kung Ready For Departure naba
+  Future<void> updateReadyForDepartureStatus(String ticketId, bool isReadyForDeparture) async {
+    try {
+      await FirebaseFirestore.instance.collection('admin').doc(ticketId).update({
+        'data.isReadyForDeparture': isReadyForDeparture
+      });
+    } catch (e) {
+      debugPrint("Error updating ready for departure status: $e");
+    }
+  }
+
+
+  //  update isCompleted status for all tickets based on departure time
  //For each ticket, checks if departureTime is before the current time and isCompleted is false.
   // If true, calls updateTicketStatus to mark the ticket as completed.
   Future<void> updateAllTicketStatuses() async {

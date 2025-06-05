@@ -9,6 +9,8 @@ class AdminBusTicket {
   final String? ticketId;   //unique Firestore document ID
   final bool isAircon;   //kung with aircon or wlay aircon ang bus
   final bool isCompleted;   //status sa bus kung humanag byahe or wla
+  final String plateNumber; // Bus plate number
+  final bool isReadyForDeparture;  //status kung ready for departure
 
 
   AdminBusTicket(
@@ -19,6 +21,8 @@ class AdminBusTicket {
       required this.ticketPrice,
       required this.isAircon,
       this.isCompleted = false,
+        required this.plateNumber,
+        this.isReadyForDeparture = false,
       });
 
   AdminBusTicket.noID(
@@ -29,6 +33,8 @@ class AdminBusTicket {
       required this.ticketPrice,
       required this.isAircon,
         this.isCompleted = false,
+        required this.plateNumber,
+        this.isReadyForDeparture = false,
       });
 
   //gina converts  niya ang ticket object
@@ -44,6 +50,8 @@ class AdminBusTicket {
         "ticket price": ticketPrice,
         "aircon": isAircon,
         "isCompleted": isCompleted,
+        "plateNumber": plateNumber,
+        "isReadyForDeparture": isReadyForDeparture,
       }
     };
   }
@@ -58,6 +66,8 @@ class AdminBusTicket {
         "ticket price": ticketPrice,
         "aircon": isAircon,
         "isCompleted": isCompleted,
+        "plateNumber": plateNumber,
+        "isReadyForDeparture": isReadyForDeparture,
 
       }
     };
@@ -77,6 +87,8 @@ class AdminBusTicket {
       ticketPrice: data['ticket price'] ?? 0,
       isAircon: data['aircon'] ?? false,
       isCompleted: data['isCompleted'] ?? false,
+      plateNumber: data['plateNumber'] ?? 'N/A',
+      isReadyForDeparture: data['isReadyForDeparture'] ?? false,
     );
   }
 
