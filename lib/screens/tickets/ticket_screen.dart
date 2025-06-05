@@ -150,6 +150,7 @@ class TicketScreen extends StatelessWidget {
                 Text("Departure: $departure"),
                 Text("Total Seats: ${adminTicket.totalSeats}"),
                 Text("Ticket Price: ₱${adminTicket.ticketPrice}"),
+                Text('Plate Number: ${adminTicket.plateNumber}'),
                 Text("Aircon: ${adminTicket.isAircon ? "Yes" : "No"}"),
               ],
             ),
