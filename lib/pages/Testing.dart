@@ -152,24 +152,69 @@ class _TestingState extends State<Testing> {
       itemCount: tickets.length,
       itemBuilder: (context, index) {
         final ticket = tickets[index];
-        return Card(
-          child: ListTile(
-            title: Text('${ticket.destination[0]} → ${ticket.destination[1]}'),
-            subtitle: Text(
-              'Departure: ${ticket.departureTime.toString()}\n'
-                  'Price: ₱${ticket.ticketPrice}\n'
-                  'Aircon: ${ticket.isAircon ? "Yes" : "No"}',
-            ),
-            trailing: ElevatedButton(
-              onPressed: () async {
-                final selectedSeat = await showSeatPickerDialog(context, ticket);
-                if (selectedSeat != null) {
-                  await _showPaymentDialog(context, ticket, selectedSeat);
-                }
-              },
-              child: const Text('Book Ticket'),
-            ),
-          ),
+        return FutureBuilder<Set<int>>(
+          future: _ticketService.getTakenSeats(ticket),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Card(
+                child: ListTile(
+                  title: Text('Loading...'),
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Card(
+                child: ListTile(
+                  title: Text('Error: ${snapshot.error}'),
+                ),
+              );
+            }
+
+            final takenSeats = snapshot.data as Set<int>? ?? {};
+            final isFullyBooked = takenSeats.length >= ticket.totalSeats;
+
+            // bai usaba lang ninyo diri na part kung gusto mo mag change sa
+            //status sa bus kung Ready For Departure naba 10mins before sa time sa bus bai
+            //kay mag mo display na ang Ready For Departure
+            //tas dili na maka book ang mga user kay mo auto disable mn sya
+            final isReadyForDeparture = ticket.isReadyForDeparture ||
+                ticket.departureTime.difference(DateTime.now()).inMinutes <= 10;
+            final canBook = !isFullyBooked && !isReadyForDeparture;
+
+            return Card(
+              child: ListTile(
+                title: Text('${ticket.destination[0]} → ${ticket.destination[1]}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Departure: ${ticket.departureTime.toString()}'),
+                    Text('Price: ₱${ticket.ticketPrice}'),
+                    Text('Aircon: ${ticket.isAircon ? "Yes" : "No"}'),
+
+                    //plate number
+                    Text('Plate Number: ${ticket.plateNumber}'),
+
+                    //check the seat kung avail paba, then pag full na kay dina maka book ang user kay full na ang bus
+                    Text('Available Seats: ${ticket.totalSeats - takenSeats.length}/${ticket.totalSeats}'),
+                    if (isFullyBooked)
+                      const Text('Status: Fully Booked', style: TextStyle(color: Colors.red)),
+                    if (isReadyForDeparture)
+                      const Text('Status: Ready for Departure', style: TextStyle(color: Colors.orange)),
+                  ],
+                ),
+                trailing: ElevatedButton(
+                  onPressed: canBook ? () async {
+                    final selectedSeat = await showSeatPickerDialog(context, ticket);
+                    if (selectedSeat != null) {
+                      await _showPaymentDialog(context, ticket, selectedSeat);
+                    }
+                  } : null,
+                  child: Text(canBook ? 'Book Ticket' : 'Not Available'), //check niya kung avail or not available ba ang bus ticket
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -246,6 +291,7 @@ class _TestingState extends State<Testing> {
                             Text('To: ${userTicket.data.destination[1]}'),
                             Text('Departure: ${userTicket.data.departureTime}'),
                             Text('Seat: ${userTicket.seat}'),
+                            Text('Plate Number: ${userTicket.data.plateNumber}'),
                             Text('Status: ${userTicket.isPaid ? 'Paid' : 'Unpaid'}'),
                           ],
                         ),
