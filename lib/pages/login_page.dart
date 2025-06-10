@@ -1,5 +1,6 @@
 import 'package:capstone2/Admin/pages/AdminHomeScreen.dart';
 import 'package:capstone2/components/my_textfield.dart';
+import 'package:capstone2/pages/forget_pw_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,20 +14,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Text editing controllers
   final gmailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // Sign user in method
   void signUserIn() async {
-    // Show loading circle
     showDialog(
       context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -34,13 +28,9 @@ class _LoginPageState extends State<LoginPage> {
         email: gmailController.text,
         password: passwordController.text,
       );
-      // Pop the loading circle
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      // Pop the loading circle
       Navigator.pop(context);
-
-      // Handle errors
       if (e.code == 'user-not-found') {
         showErrorMessage('No user found for that email.');
       } else if (e.code == 'wrong-password') {
@@ -51,20 +41,17 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Error message dialog
   void showErrorMessage(String message) {
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              message,
-              style: GoogleFonts.poppins(),
-            ),
+      builder: (context) => AlertDialog(
+        title: Center(
+          child: Text(
+            message,
+            style: GoogleFonts.poppins(),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -75,9 +62,46 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void showRefundPolicy() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.blue),
+            const SizedBox(width: 10),
+            Text(
+              'Refund Policy',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            "Please be advised that all payments made through Scan N' Go are final and non-refundable. "
+            "By completing your purchase, you acknowledge and agree that refunds will not be issued under any circumstances.\n\n"
+            "This policy is in accordance with the Consumer Protection Act, Section 14, "
+            "which permits sellers to establish no-refund terms when clearly disclosed prior to the transaction.\n\n"
+            "For any questions or concerns, please contact our support team.",
+            style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Close',
+              style: GoogleFonts.poppins(color: Colors.blue),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Get screen size
     final screenSize = MediaQuery.of(context).size;
     final padding = screenSize.width * 0.05;
 
@@ -99,14 +123,31 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
-                  Image.asset(
-                    'lib/images/Davo.png',
-                    width: screenSize.width * 0.5,
-                    fit: BoxFit.contain,
+                  // Refund Policy button at top-left corner outside Card
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: IconButton(
+                        onPressed: showRefundPolicy,
+                        icon: const Icon(
+                          Icons.info_outline,
+                          color: Colors.blue,
+                        ),
+                        tooltip: 'Refund Policy Information',
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 30),
-                  // Tagline
+
+                  Text(
+                    "Scan N' Go",
+                    style: GoogleFonts.poppins(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Text(
                     'Your Partner in Safe and Convenient Travel.',
                     textAlign: TextAlign.center,
@@ -116,7 +157,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Card Container
                   Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -126,33 +166,41 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
                         children: [
-                          // Username text field
                           MyTextfield(
                             controller: gmailController,
                             hintText: 'Email',
                             obscureText: false,
                           ),
                           const SizedBox(height: 20),
-                          // Password text field
                           MyTextfield(
                             controller: passwordController,
                             hintText: 'Password',
                             obscureText: true,
                           ),
                           const SizedBox(height: 10),
-                          // Forgot password
                           Align(
                             alignment: Alignment.centerRight,
-                            child: Text(
-                              'Forget Password?',
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return ForgotPasswordPage();
+                                    },
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'Forget Password?',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.blue,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(height: 30),
-                          // Sign in button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
@@ -173,7 +221,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           const SizedBox(height: 15),
-                          // Admin Demo button
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
@@ -198,7 +245,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Not a member? Register now
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

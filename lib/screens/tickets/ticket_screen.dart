@@ -1,10 +1,10 @@
-import 'dart:developer';
 import 'package:capstone2/data/controllers/UserTicket_data_controller.dart';
 import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:capstone2/res/app_style.dart';
 import 'package:capstone2/screens/tickets/HistoryPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class TicketScreen extends StatelessWidget {
@@ -27,15 +27,16 @@ class TicketScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Your Tickets",
-                    style: TextStyle(
+                  Text(
+                    "Your Booked Tickets",
+                    style: GoogleFonts.poppins(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: AppStyle.textColor2,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.history, color: Colors.black),
+                    icon: Icon(Icons.history, color: AppStyle.textColor2),
                     tooltip: 'View History',
                     onPressed: () {
                       Navigator.push(
@@ -48,15 +49,26 @@ class TicketScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              // Ticket Tabs
+              // Stream & Tabs
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: userTickets,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: AppStyle.busrouteBG2Des,
+                        ),
+                      );
                     } else if (!snapshot.hasData || snapshot.data == null) {
-                      return const Center(child: Text("No tickets found"));
+                      return Center(
+                        child: Text(
+                          "No tickets found",
+                          style: GoogleFonts.poppins(
+                            color: AppStyle.textColor,
+                          ),
+                        ),
+                      );
                     }
 
                     final now = DateTime.now();
@@ -67,7 +79,7 @@ class TicketScreen extends StatelessWidget {
                           try {
                             return UserBusTicket.fromJSON(doc);
                           } catch (err) {
-                            log("Error parsing ticket: $err");
+                            debugPrint("Error parsing ticket: $err");
                             return null;
                           }
                         })
@@ -75,18 +87,16 @@ class TicketScreen extends StatelessWidget {
                         .toList();
 
                     final ongoingTickets = tickets.where((ticket) {
-                      final departure = ticket.data.departureTime;
-                      final departureDate = DateTime(
-                          departure.year, departure.month, departure.day);
-                      return departureDate.isAtSameMomentAs(today) ||
-                          departureDate.isAfter(today);
+                      final date = ticket.data.departureTime;
+                      final depDate = DateTime(date.year, date.month, date.day);
+                      return depDate.isAtSameMomentAs(today) ||
+                          depDate.isAfter(today);
                     }).toList();
 
                     final completedTickets = tickets.where((ticket) {
-                      final departure = ticket.data.departureTime;
-                      final departureDate = DateTime(
-                          departure.year, departure.month, departure.day);
-                      return departureDate.isBefore(today);
+                      final date = ticket.data.departureTime;
+                      final depDate = DateTime(date.year, date.month, date.day);
+                      return depDate.isBefore(today);
                     }).toList();
 
                     return DefaultTabController(
@@ -132,16 +142,23 @@ class TicketScreen extends StatelessWidget {
 
   Widget _buildTicketList(List<UserBusTicket> tickets) {
     if (tickets.isEmpty) {
-      return const Center(child: Text("No tickets found"));
+      return Center(
+        child: Text(
+          "No tickets found",
+          style: GoogleFonts.poppins(
+            color: AppStyle.textColor,
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
       itemCount: tickets.length,
       itemBuilder: (context, index) {
-        final userTicket = tickets[index];
-        final adminTicket = userTicket.data;
-        final departure = DateFormat('MMM d, yyyy – hh:mm a')
-            .format(adminTicket.departureTime);
+        final ticket = tickets[index];
+        final bus = ticket.data;
+        final departure =
+            DateFormat('MMM d, yyyy – hh:mm a').format(bus.departureTime);
 
         return Card(
           elevation: 4,
@@ -154,101 +171,95 @@ class TicketScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
+                // Header Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
-                        'Ticket #${userTicket.userTicketId}',
-                        style: const TextStyle(
+                        'Ticket #${ticket.userTicketId}',
+                        style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
+                          color: AppStyle.textColor2,
                         ),
-                        overflow: TextOverflow.ellipsis, // Truncate if needed
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: userTicket.isPaid
-                              ? Colors.green[100]
-                              : Colors.orange[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          userTicket.isPaid
-                              ? 'Payment Successful'
-                              : 'Payment Pending',
-                          style: TextStyle(
-                            color: userTicket.isPaid
-                                ? Colors.green
-                                : Colors.orange,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: ticket.isPaid
+                            ? Colors.green[100]
+                            : Colors.orange[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        ticket.isPaid
+                            ? 'Payment Successful'
+                            : 'Payment Pending',
+                        style: GoogleFonts.poppins(
+                          color: ticket.isPaid ? Colors.green : Colors.orange,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
                         ),
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.directions_bus, size: 18),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
+                // Ticket Details
+                _buildTicketDetailRow(
+                  Icons.directions_bus,
+                  'Route: ${bus.destination[0]} → ${bus.destination[1]}',
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.event, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Departure: $departure'),
-                  ],
+                _buildTicketDetailRow(
+                  Icons.event,
+                  'Departure: $departure',
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.chair_alt, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Seat No: ${userTicket.seat}'),
-                  ],
+                _buildTicketDetailRow(
+                  Icons.confirmation_number,
+                  'Price: ₱${bus.ticketPrice}',
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.confirmation_number, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Price: ₱${adminTicket.ticketPrice}'),
-                  ],
+                _buildTicketDetailRow(
+                  Icons.chair_alt,
+                  'Seat No: ${ticket.seat}',
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.ac_unit, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Aircon: ${adminTicket.isAircon ? "Yes" : "No"}'),
-                  ],
+                _buildTicketDetailRow(
+                  Icons.directions_bus_filled,
+                  'Plate No: ${bus.plateNumber}',
+                ),
+                _buildTicketDetailRow(
+                  Icons.ac_unit,
+                  'Aircon: ${bus.isAircon ? "Yes" : "No"}',
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTicketDetailRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppStyle.coolLightGray),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: AppStyle.textColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

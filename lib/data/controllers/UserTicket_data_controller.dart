@@ -7,19 +7,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
-class UserTicketController{
+class UserTicketController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> uploadUserTicket(UserBusTicket ticket, Checkout userpost, int seat) async {
+  Future<void> uploadUserTicket(
+      UserBusTicket ticket, Checkout userpost, int seat) async {
     try {
-     final holder = await CheckoutController().createCheckoutController(userpost.toJson());
-      await UserTicketDatabase().uploadUserTicketToDatabase(ticket.toJSON(),holder.toJSON(),seat);
+      final holder = await CheckoutController()
+          .createCheckoutController(userpost.toJson());
+      await UserTicketDatabase()
+          .uploadUserTicketToDatabase(ticket.toJSON(), holder.toJSON(), seat);
     } catch (e) {
       print("Error uploading user ticket: $e");
     }
   }
 
-  Stream<QuerySnapshot> getUserTickets(){
+  Stream<QuerySnapshot> getUserTickets() {
     return UserTicketDatabase().getUserTickets();
   }
 

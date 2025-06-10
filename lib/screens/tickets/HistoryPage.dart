@@ -44,7 +44,7 @@ class BusHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Stream<QuerySnapshot> userTickets =
-    UserTicketController().getUserTickets();
+        UserTicketController().getUserTickets();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Bus Ticket History")),
@@ -62,22 +62,22 @@ class BusHistoryPage extends StatelessWidget {
 
           final completedTickets = snapshot.data!.docs
               .map((e) {
-            try {
-              return UserBusTicket.fromJSON(e);
-            } catch (_) {
-              return null;
-            }
-          })
+                try {
+                  return UserBusTicket.fromJSON(e);
+                } catch (_) {
+                  return null;
+                }
+              })
               .whereType<UserBusTicket>()
               .where((ticket) {
-            final departure = ticket.data.departureTime;
-            final departureDate = DateTime(
-              departure.year,
-              departure.month,
-              departure.day,
-            );
-            return departureDate.isBefore(today);
-          })
+                final departure = ticket.data.departureTime;
+                final departureDate = DateTime(
+                  departure.year,
+                  departure.month,
+                  departure.day,
+                );
+                return departureDate.isBefore(today);
+              })
               .toList();
 
           if (completedTickets.isEmpty) {
@@ -109,15 +109,17 @@ class BusHistoryPage extends StatelessWidget {
                     children: [
                       Text("Departure: $departure"),
                       Text("Seat: ${ticket.seat}"),
+                      Text("Plate Number: ${busData.plateNumber}"),
                       Text("Status: ${ticket.isPaid ? "Paid" : "Unpaid"}"),
                     ],
                   ),
                   trailing: ticket.userTicketId != null
                       ? IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: 'Delete Ticket',
-                    onPressed: () => _confirmDelete(context, ticket.userTicketId),
-                  )
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          tooltip: 'Delete Ticket',
+                          onPressed: () =>
+                              _confirmDelete(context, ticket.userTicketId),
+                        )
                       : null,
                 ),
               );

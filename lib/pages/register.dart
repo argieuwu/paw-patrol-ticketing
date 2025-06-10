@@ -82,14 +82,16 @@ class _RegisterState extends State<Register> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
-                  Image.asset(
-                    'lib/images/Davo.png',
-                    width: screenSize.width * 0.5,
-                    fit: BoxFit.contain,
+                  // App Title
+                  Text(
+                    "Scan N' Go",
+                    style: GoogleFonts.poppins(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
                   ),
-                  const SizedBox(height: 30),
-                  // Tagline
+                  const SizedBox(height: 10),
                   Text(
                     'Your Partner in Safe and Convenient Travel.',
                     textAlign: TextAlign.center,
@@ -109,28 +111,24 @@ class _RegisterState extends State<Register> {
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
                         children: [
-                          // Gmail
                           MyTextfield(
                             controller: gmailController,
                             hintText: 'Email',
                             obscureText: false,
                           ),
                           const SizedBox(height: 20),
-                          // Password
                           MyTextfield(
                             controller: passwordController,
                             hintText: 'Password',
                             obscureText: true,
                           ),
                           const SizedBox(height: 20),
-                          // Confirm Password
                           MyTextfield(
                             controller: confirmPasswordController,
                             hintText: 'Confirm Password',
                             obscureText: true,
                           ),
                           const SizedBox(height: 30),
-                          // Sign Up button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
@@ -155,7 +153,6 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Already have an account? Login now
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
