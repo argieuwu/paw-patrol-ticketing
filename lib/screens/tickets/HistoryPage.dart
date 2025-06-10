@@ -109,6 +109,7 @@ class BusHistoryPage extends StatelessWidget {
                     children: [
                       Text("Departure: $departure"),
                       Text("Seat: ${ticket.seat}"),
+                      Text('Plate Number: ${busData.plateNumber}'),
                       Text("Status: ${ticket.isPaid ? "Paid" : "Unpaid"}"),
                     ],
                   ),

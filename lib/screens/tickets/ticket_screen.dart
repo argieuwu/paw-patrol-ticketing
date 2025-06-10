@@ -199,51 +199,12 @@ class TicketScreen extends StatelessWidget {
 
                 const SizedBox(height: 8),
                 const Divider(),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.directions_bus, size: 18),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.event, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Departure: $departure'),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.chair_alt, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Seat No: ${userTicket.seat}'),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.confirmation_number, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Price: ₱${adminTicket.ticketPrice}'),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.ac_unit, size: 18),
-                    const SizedBox(width: 6),
-                    Text('Aircon: ${adminTicket.isAircon ? "Yes" : "No"}'),
-                  ],
-                ),
+                Text(
+                    "Route: ${adminTicket.destination[0]} → ${adminTicket.destination[1]}"),
+                Text("Departure: $departure"),
+                Text("Total Seats: ${adminTicket.totalSeats}"),
+                Text("Ticket Price: ₱${adminTicket.ticketPrice}"),
+                Text("Aircon: ${adminTicket.isAircon ? "Yes" : "No"}"),
               ],
             ),
           ),

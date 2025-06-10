@@ -17,6 +17,7 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
   final TextEditingController pointBController = TextEditingController();
   final TextEditingController seatsController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController plateNumberController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +43,14 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
               controller: pointBController,
               decoration: const InputDecoration(
                 labelText: 'Destination (Point B)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: plateNumberController,
+              decoration: const InputDecoration(
+                labelText: 'Bus Plate Number',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -117,7 +126,8 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
                 if (pointAController.text.isEmpty ||
                     pointBController.text.isEmpty ||
                     totalSeats == null ||
-                    ticketPrice == null) {
+                    ticketPrice == null ||
+                    plateNumberController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -133,6 +143,7 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
                   totalSeats: totalSeats,
                   ticketPrice: ticketPrice,
                   isAircon: isAircon,
+                  plateNumber: plateNumberController.text,
                 );
 
                 AdminTicketController().uploadTicket(newTicket);
@@ -146,6 +157,7 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
                 pointBController.clear();
                 seatsController.clear();
                 priceController.clear();
+                plateNumberController.clear();
                 setState(() {
                   dateTime = DateTime.now();
                   isAircon = false;
@@ -165,6 +177,7 @@ class _AddBusRouteScreenState extends State<AddBusRouteScreen> {
     pointBController.dispose();
     seatsController.dispose();
     priceController.dispose();
+    plateNumberController.dispose();
     super.dispose();
   }
 }
