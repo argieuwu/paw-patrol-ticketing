@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:capstone2/data/model/UserCheckout.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
 class Apiservice {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore db = FirebaseFirestore.instance;
+
   final String secretKey =
       'sk_test_899mPkGNAeddzutaZibPTV4U'; // Yes aware ko haha
   late String basicAuth;
@@ -63,6 +67,22 @@ class Apiservice {
       return "$id : has been Expired";
     } else {
       throw Exception('API error: ${response.body}');
+    }
+  }
+
+  Future<void> updateMemberTickets(String id) async{
+    final response = await http.get(
+        Uri.parse('https://api.paymongo.com/v1/checkout_sessions/$id'),
+        headers: {
+          HttpHeaders.authorizationHeader: basicAuth,
+          'Content-Type': 'application/json',
+        });
+
+    if(response.statusCode == 200) {
+      // TODO Update shit database
+    }
+    else{
+      throw Exception("Websocket error.");
     }
   }
 }

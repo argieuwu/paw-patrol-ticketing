@@ -1,3 +1,4 @@
+import 'package:capstone2/data/model/UsereBusTicket.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
