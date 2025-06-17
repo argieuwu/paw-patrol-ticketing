@@ -30,5 +30,7 @@ class UserTicketDatabase{
         .where('bus data.data.isCompleted', isEqualTo: true)
         .snapshots();
   }
-
+Future<void> autoUpdateUserTickets() async{
+    db.collectionGroup(auth.currentUser!.uid).where();
+  }
 }
