@@ -39,4 +39,8 @@ class UserTicketController{
       debugPrint("Error deleting user ticket: $e");
     }
   }
+
+  Future<void> autoUpdateController() async{
+    
+  }
 }

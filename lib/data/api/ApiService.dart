@@ -10,7 +10,7 @@ class Apiservice {
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   final String secretKey =
-      'sk_test_899mPkGNAeddzutaZibPTV4U'; // Yes aware ko haha
+      ' ;sk_test_899mPkGNAeddzutaZibPTV4U'; // Yes aware ko haha
   late String basicAuth;
   Apiservice() {
     basicAuth = 'Basic ${base64Encode(utf8.encode('$secretKey:'))}';
