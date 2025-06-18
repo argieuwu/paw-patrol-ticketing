@@ -40,7 +40,33 @@ class UserTicketController{
     }
   }
 
-  Future<void> autoUpdateController() async{
-    
+  Future<void> autoUpdateController() async {
+    final db = FirebaseFirestore.instance;
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final apiService = Apiservice();
+
+
+    final unpaidTickets = await UserTicketDatabase().autoUpdateUserTickets();
+
+    for (final ticket in unpaidTickets) {
+      final checkoutId = ticket['apiData']['id'];
+      final userTicketId = ticket['user ticket id'];
+
+      try {
+        final checkout = await apiService.getCheckout(checkoutId);
+
+        if (checkout.status == 'paid' || checkout.status == 'succeeded') {
+          await db
+              .collection('user')
+              .doc(uid)
+              .collection('tickets')
+              .doc(userTicketId)
+              .update({'isPaid': true});
+        }
+      } catch (e) {
+        throw('Websocket Failed');
+        debugPrint('Error updating ticket $userTicketId: $e');
+      }
+    }
   }
 }

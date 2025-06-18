@@ -69,20 +69,4 @@ class Apiservice {
       throw Exception('API error: ${response.body}');
     }
   }
-
-  Future<void> updateMemberTickets(String id) async{
-    final response = await http.get(
-        Uri.parse('https://api.paymongo.com/v1/checkout_sessions/$id'),
-        headers: {
-          HttpHeaders.authorizationHeader: basicAuth,
-          'Content-Type': 'application/json',
-        });
-
-    if(response.statusCode == 200) {
-      // TODO Update shit database
-    }
-    else{
-      throw Exception("Websocket error.");
-    }
-  }
 }

@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'package:capstone2/pages/Testing.dart';
 import 'package:capstone2/pages/auth.dart';
-import 'package:capstone2/screens/home/all_ticket.dart';
-import 'package:capstone2/screens/home/home_screen.dart'; // Import the HomeScreen
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'data/controllers/UserTicket_data_controller.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,39 +12,59 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(const MainApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MainApp extends StatefulWidget {
+  const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  Timer? _autoUpdateTimer;
+  final UserTicketController _ticketController = UserTicketController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _startAutoUpdate();
+      } else {
+        _stopAutoUpdate();
+      }
+    });
+  }
+
+  void _startAutoUpdate() {
+    _autoUpdateTimer?.cancel();
+    _autoUpdateTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+      await _ticketController.autoUpdateController();
+    });
+  }
+
+  void _stopAutoUpdate() {
+    _autoUpdateTimer?.cancel();
+    _autoUpdateTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _stopAutoUpdate();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/auth', // Set the initial route to the Auth screen
+      initialRoute: '/auth',
       routes: {
-        '/auth': (context) => const Auth(), // Auth screen
-        '/home': (context) => Testing(), // HomeScreen
-        // '/allTickets': (context) => Testing(),
-
-        // '/allTickets': (context) {
-        //   // Fetch the ticket data dynamically (e.g., from Firestore or a provider)
-        //   final ticket = {
-        //     'departure': 'Tagum', // Example data
-        //     'destination': 'Davao', // Example data
-        //     'departure_time': '10:00 AM', // Example data
-        //     'duration': '2 hours', // Example data
-        //     'price': 200.0, // Example data
-        //   };
-        //
-        //   return TicketView(
-        //     ticket: ticket,
-        //     onTap: () {
-        //       print('Ticket tapped!');
-        //     },
-        //   );
-        // },
+        '/auth': (context) => const Auth(),
+        '/home': (context) => Testing(),
       },
     );
   }
