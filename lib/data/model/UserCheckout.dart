@@ -39,7 +39,7 @@ class UserCheckout {
       client_key: attributes['client_key'] ?? '',
       description: attributes['description'] ?? '',
       items: lineItemsList,
-      status: attributes['status'] ?? '',
+      status: attributes['payment_intent']['attributes']['status'] ?? '',
       createdAt: attributes['created_at'] != null
           ? Timestamp.fromMillisecondsSinceEpoch(
               attributes['created_at'] * 1000)

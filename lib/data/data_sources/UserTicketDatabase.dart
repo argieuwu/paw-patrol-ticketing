@@ -30,7 +30,18 @@ class UserTicketDatabase{
         .where('bus data.data.isCompleted', isEqualTo: true)
         .snapshots();
   }
-Future<void> autoUpdateUserTickets() async{
-    db.collectionGroup(auth.currentUser!.uid).where();
+Future<List<Map<String,dynamic>>> autoUpdateUserTickets() async{
+    final docsCollection = await db.collection('user')
+    .doc(auth.currentUser!.uid)
+    .collection('tickets')
+    .where('isPaid', isEqualTo: false)
+    .get();
+
+    List<Map<String, dynamic>> unpaidTickets = docsCollection.docs
+        .map((doc) => {
+      ...doc.data(),
+    })
+        .toList();
+    return unpaidTickets;
   }
 }
